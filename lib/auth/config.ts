@@ -1,7 +1,8 @@
 import GoogleProvider from "next-auth/providers/google"
 import type { NextAuthOptions } from "next-auth"
 
-import { ensureProfile } from "@/lib/supabase/admin"
+import { ensureProfile, supabaseAdmin } from "@/lib/supabase/admin"
+import { ADMIN_EMAILS } from "@/lib/constants/user-management"
 
 const allowedDomain = "planetenglish.ru"
 
@@ -40,9 +41,20 @@ export const authOptions: NextAuthOptions = {
       if (!email) return
       const fullName = message.user?.name ?? null
       const avatarUrl = message.user?.image ?? null
+      
       // Тихо пытаемся создать/обновить профиль. Ошибки логируем, но не блокируем вход.
       try {
         await ensureProfile({ email, avatarUrl, fullName })
+        
+        // Дополнительная защита: принудительно устанавливаем роль Administrator для захардкоженных email'ов
+        // Это дублирует логику из ensure_profile, но обеспечивает дополнительную защиту
+        if (ADMIN_EMAILS.includes(email as any)) {
+          await supabaseAdmin
+            .from('profiles')
+            .update({ role: 'Administrator' })
+            .eq('email', email)
+          console.log(`🔒 Установлена роль Administrator для захардкоженного админа: ${email}`)
+        }
       } catch (error) {
         console.error("ensure_profile failed:", error)
       }

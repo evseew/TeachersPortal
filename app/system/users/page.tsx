@@ -41,6 +41,12 @@ export default function UserManagementPage() {
   const [users, setUsers] = useState<UiUser[]>([])
   const [filteredUsers, setFilteredUsers] = useState<UiUser[]>([])
   const [searchTerm, setSearchTerm] = useState("")
+  
+  // Быстрые фильтры
+  const [selectedRole, setSelectedRole] = useState<string>("")
+  const [selectedBranch, setSelectedBranch] = useState<string>("")
+  const [selectedCategory, setSelectedCategory] = useState<string>("")
+  
   const [showAddForm, setShowAddForm] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [editingUser, setEditingUser] = useState<UiUser | null>(null)
