@@ -1,8 +1,7 @@
 import GoogleProvider from "next-auth/providers/google"
 import type { NextAuthOptions } from "next-auth"
 
-import { ensureProfile, supabaseAdmin } from "@/lib/supabase/admin"
-import { ADMIN_EMAILS } from "@/lib/constants/user-management"
+import { supabaseAdmin } from "@/lib/supabase/admin"
 
 const allowedDomain = "planetenglish.ru"
 
@@ -17,8 +16,25 @@ export const authOptions: NextAuthOptions = {
     async signIn({ user }) {
       const email = user?.email ?? ""
       if (!email) return false
+      
+      // Проверяем домен
       const domain = email.split("@")[1]
-      return domain === allowedDomain
+      if (domain !== allowedDomain) return false
+      
+      // Проверяем, существует ли пользователь в базе портала
+      try {
+        const { data: profile } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id')
+          .eq('email', email)
+          .single()
+        
+        // Разрешаем вход только если пользователь существует в базе
+        return !!profile
+      } catch (error) {
+        console.log(`Вход запрещен: пользователь ${email} не найден в базе портала`)
+        return false
+      }
     },
     async session({ session, token }) {
       if (session?.user && token?.email) {
@@ -53,30 +69,11 @@ export const authOptions: NextAuthOptions = {
   events: {
     async signIn(message) {
       const email = message.user?.email ?? ""
-      if (!email) return
-      const fullName = message.user?.name ?? null
-      const avatarUrl = message.user?.image ?? null
-      
-      // Тихо пытаемся создать/обновить профиль. Ошибки логируем, но не блокируем вход.
-      try {
-        await ensureProfile({ email, avatarUrl, fullName })
-        
-        // Дополнительная защита: принудительно устанавливаем роль Administrator для захардкоженных email'ов
-        // Это дублирует логику из ensure_profile, но обеспечивает дополнительную защиту
-        if (ADMIN_EMAILS.includes(email as any)) {
-          await supabaseAdmin
-            .from('profiles')
-            .update({ role: 'Administrator' })
-            .eq('email', email)
-          console.log(`🔒 Установлена роль Administrator для захардкоженного админа: ${email}`)
-        }
-      } catch (error) {
-        console.error("ensure_profile failed:", error)
-      }
+      console.log(`✅ Успешный вход пользователя: ${email}`)
     },
   },
   pages: {
-    signIn: '/login',
+    signIn: '/auth/login',
     error: '/auth/error',
   },
   session: {

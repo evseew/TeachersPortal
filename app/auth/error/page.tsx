@@ -49,7 +49,7 @@ export default function AuthErrorPage() {
           
           <div className="space-y-2 pt-4">
             <Button asChild className="w-full">
-              <Link href="/login">
+              <Link href="/auth/login">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Попробовать снова
               </Link>

@@ -47,19 +47,10 @@ export default function UserManagementPage() {
   const [selectedBranch, setSelectedBranch] = useState<string>("")
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   
-  const [showAddForm, setShowAddForm] = useState(false)
-  const [isAdding, setIsAdding] = useState(false)
   const [editingUser, setEditingUser] = useState<UiUser | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [newUser, setNewUser] = useState({
-    name: "",
-    email: "",
-    role: "",
-    branch_id: "",
-    category: "",
-  })
   
   const { branches, loading: branchesLoading } = useBranches()
 
@@ -126,46 +117,6 @@ export default function UserManagementPage() {
     setFilteredUsers(filtered)
   }, [users, searchTerm, selectedRole, selectedBranch, selectedCategory])
 
-  const addUser = async () => {
-    // Базовая валидация
-    if (!newUser.name || !newUser.email || !newUser.role || !newUser.branch_id) {
-      setError("Пожалуйста, заполните все обязательные поля")
-      return
-    }
-    
-    // Category обязательна для Teacher и Senior Teacher
-    if (isTeacherRole(newUser.role) && !newUser.category) {
-      setError("Категория обязательна для учителей")
-      return
-    }
-
-    setIsAdding(true)
-    setError(null)
-
-    try {
-      // В реальном приложении здесь должен быть API вызов для создания пользователя
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
-      const selectedBranch = branches.find(b => b.id === newUser.branch_id)
-      const user = {
-        user_id: String(Date.now()),
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        branch_name: selectedBranch?.name || null,
-        branch_id: newUser.branch_id,
-        category: newUser.category || null,
-      }
-
-      setUsers([...users, user])
-      setNewUser({ name: "", email: "", role: "", branch_id: "", category: "" })
-      setShowAddForm(false)
-    } catch (err: any) {
-      setError(err.message || "Ошибка при добавлении пользователя")
-    } finally {
-      setIsAdding(false)
-    }
-  }
 
   const updateUser = async (user: UiUser) => {
     if (!user.role) {

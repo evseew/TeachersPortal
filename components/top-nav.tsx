@@ -24,7 +24,7 @@ export function TopNav() {
 
   const handleLogoutClick = () => {
     console.log("[v0] Logout clicked")
-    router.push("/login")
+    router.push("/auth/login")
   }
 
   return (

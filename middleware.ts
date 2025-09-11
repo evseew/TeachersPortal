@@ -12,7 +12,6 @@ export default withAuth(
     if (
       pathname.startsWith('/auth/') ||
       pathname.startsWith('/api/auth/') ||
-      pathname === '/login' ||
       pathname === '/'
     ) {
       return NextResponse.next()
@@ -44,7 +43,6 @@ export default withAuth(
         if (
           pathname.startsWith('/auth/') ||
           pathname.startsWith('/api/auth/') ||
-          pathname === '/login' ||
           pathname === '/'
         ) {
           return true
