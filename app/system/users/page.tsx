@@ -237,6 +237,55 @@ export default function UserManagementPage() {
   const isNewUserTeacher = isTeacherRole(newUser.role)
   const isFormValid = newUser.name && newUser.email && newUser.role && newUser.branch_id && (!isNewUserTeacher || newUser.category)
 
+  // Синхронизация пользователей
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState<any>(null)
+
+  const syncUsers = async () => {
+    setIsSyncing(true)
+    setSyncResult(null)
+    setError(null)
+    
+    try {
+      const response = await fetch('/api/system/sync-users/manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Ошибка синхронизации')
+      }
+      
+      setSyncResult(result)
+      
+      // Обновляем список пользователей
+      const { listUsers } = await import("@/lib/api/users")
+      const rows = await listUsers()
+      const mappedUsers = rows.map((r) => ({
+        user_id: r.user_id,
+        name: r.full_name,
+        email: r.email,
+        role: r.role,
+        branch_name: r.branch_name,
+        branch_id: r.branch_id,
+        category: r.category,
+        avatar_url: r.avatar_url,
+      }))
+      setUsers(mappedUsers)
+      setFilteredUsers(mappedUsers)
+      
+    } catch (error: any) {
+      console.error('Ошибка синхронизации:', error)
+      setError(error.message || 'Произошла ошибка при синхронизации')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   return (
     <div className="flex h-screen bg-background">
       <SidebarNav />
@@ -248,6 +297,23 @@ export default function UserManagementPage() {
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {syncResult && (
+                <Alert variant="default" className="border-green-200 bg-green-50">
+                  <AlertCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-800">
+                    <strong>Синхронизация завершена!</strong><br/>
+                    Добавлено: {syncResult.results?.added || 0}, 
+                    Обновлено: {syncResult.results?.updated || 0}, 
+                    Без изменений: {syncResult.results?.unchanged || 0}
+                    {syncResult.results?.errors?.length > 0 && (
+                      <span className="text-orange-600">
+                        <br/>Ошибок: {syncResult.results.errors.length}
+                      </span>
+                    )}
+                  </AlertDescription>
                 </Alert>
               )}
               
@@ -263,12 +329,13 @@ export default function UserManagementPage() {
                   </div>
                 </div>
                 <Button
-                  onClick={() => {/* TODO: Добавить функцию синхронизации */}}
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  onClick={syncUsers}
+                  disabled={isSyncing}
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm disabled:opacity-50"
                   title="Синхронизировать пользователей из Pyrus"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Sync from Pyrus
+                  {isSyncing ? 'Syncing...' : 'Sync from Pyrus'}
                 </Button>
               </div>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>

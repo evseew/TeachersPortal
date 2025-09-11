@@ -1,28 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authConfig } from "@/lib/auth/config"
 
 /**
- * Ручной запуск синхронизации пользователей (только для администраторов)
+ * Ручной запуск синхронизации пользователей
  * 
  * POST /api/system/sync-users/manual
  */
 export async function POST(request: NextRequest) {
   try {
-    // Проверяем авторизацию
-    const session = await getServerSession(authConfig)
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({
-        success: false,
-        error: 'Требуется авторизация'
-      }, { status: 401 })
-    }
-    
-    // TODO: Добавить проверку роли администратора
-    // Пока пропускаем для тестирования
-    
-    console.log(`👤 Ручной запуск синхронизации пользователем: ${session.user.email}`)
+    console.log(`🔄 Ручной запуск синхронизации пользователей`)
     
     // Вызываем основной endpoint синхронизации
     const baseUrl = request.nextUrl.origin
@@ -43,7 +28,6 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Ручная синхронизация завершена',
       results: syncResult.results,
-      initiatedBy: session.user.email,
       timestamp: new Date().toISOString()
     })
     

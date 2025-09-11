@@ -416,8 +416,7 @@ export default function SystemConfigurationPage() {
                           )}
                         </div>
                         </div>
-                      ))
-                    )}
+                      )))
                   </div>
                 </div>
               </CardContent>

@@ -31,4 +31,19 @@ export async function deleteBranch(id: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to delete branch (${res.status})`)
 }
 
+export interface BranchUsageInfo {
+  canDelete: boolean
+  linkedRecords: {
+    profiles: number
+    metrics: number
+    profileDetails: Array<{ user_id: string; full_name: string; email: string }>
+  }
+}
+
+export async function checkBranchUsage(id: string): Promise<BranchUsageInfo> {
+  const res = await fetch(`/api/system/branches/${id}/check-usage`, { cache: "no-store" })
+  if (!res.ok) throw new Error(`Failed to check branch usage (${res.status})`)
+  return (await res.json()) as BranchUsageInfo
+}
+
 
