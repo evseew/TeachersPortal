@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthSessionProvider } from "@/components/auth/session-provider"
 import { ThemeCustomizer } from "@/components/theme-customizer"
+import { ClientOnly } from "@/components/client-only"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,20 +22,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        {process.env.NEXT_PUBLIC_AUTH_ENABLED === "true" ? (
-          <AuthSessionProvider>
-            <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-              {children}
-              <ThemeCustomizer />
-            </ThemeProvider>
-          </AuthSessionProvider>
-        ) : (
+      <body className={inter.className} suppressHydrationWarning>
+        <AuthSessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
             {children}
-            <ThemeCustomizer />
+            <ClientOnly>
+              <ThemeCustomizer />
+            </ClientOnly>
           </ThemeProvider>
-        )}
+        </AuthSessionProvider>
       </body>
     </html>
   )

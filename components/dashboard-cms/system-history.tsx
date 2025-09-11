@@ -6,9 +6,6 @@ import { Settings, Palette, Plug, Shield, Database, Upload, Download, PowerOff, 
 interface SystemEvent {
   id: string
   action:
-    | "plugin_installed"
-    | "plugin_activated"
-    | "plugin_deactivated"
     | "theme_changed"
     | "settings_saved"
     | "backup_created"
@@ -24,15 +21,6 @@ interface SystemEvent {
 }
 
 const systemEvents: SystemEvent[] = [
-  {
-    id: "1",
-    action: "plugin_activated",
-    target: "SEO Optimizer Pro",
-    user: "Admin",
-    timestamp: "10 minutes ago",
-    details: "Version 2.1.4",
-    status: "success",
-  },
   {
     id: "2",
     action: "settings_saved",
@@ -77,15 +65,6 @@ const systemEvents: SystemEvent[] = [
     timestamp: "4 hours ago",
     details: "No threats detected",
     status: "success",
-  },
-  {
-    id: "7",
-    action: "plugin_deactivated",
-    target: "Old Gallery Plugin",
-    user: "Emma Wilson",
-    timestamp: "6 hours ago",
-    details: "Replaced with new version",
-    status: "warning",
   },
   {
     id: "8",

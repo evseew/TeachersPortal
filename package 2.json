@@ -8,8 +8,9 @@
     "lint": "next lint",
     "start": "next start",
     "test": "vitest run",
-    "db:check": "node scripts/quick-db-check.js",
-    "db:fix": "node scripts/cleanup-final.js"
+    "db:check": "npx tsx scripts/db-integrity-check.ts",
+    "db:fix": "bash scripts/run-integrity-fix.sh",
+    "db:fix-js": "npx tsx scripts/fix-database-integrity.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

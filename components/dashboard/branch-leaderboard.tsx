@@ -136,14 +136,17 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
   if (showOnlyCards) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {(loading ? Array.from({ length: 5 }).map((_, i) => (
-          <Card key={`skeleton-${i}`} className={`hover:scale-105 hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2`}>
-            <CardHeader className="pb-2">
-              <div className="h-28 animate-pulse bg-muted rounded" />
-            </CardHeader>
-          </Card>
-        )) : displayRows).map((branch: any) => (
-          <Card
+        {loading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <Card key={`skeleton-${i}`} className={`hover:scale-105 hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2`}>
+              <CardHeader className="pb-2">
+                <div className="h-28 animate-pulse bg-muted rounded" />
+              </CardHeader>
+            </Card>
+          ))
+        ) : (
+          displayRows.slice(0, 5).map((branch: any) => (
+            <Card
             key={(branch.rank ?? 0) as number}
             className={`hover:scale-105 hover:-translate-y-1 transition-all duration-300 cursor-pointer border-2 ${getCardStyling(Number(branch.rank))}`}
           >
@@ -205,8 +208,9 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
                 </div>
               </div>
             </CardContent>
-          </Card>
-        ))}
+            </Card>
+          ))
+        )}
       </div>
     )
   }

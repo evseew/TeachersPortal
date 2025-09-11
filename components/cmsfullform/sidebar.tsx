@@ -59,7 +59,6 @@ import {
   Timer,
   DollarSign,
   TrendingDown,
-  Puzzle,
 } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
@@ -617,27 +616,6 @@ const menuData: MenuSection[] = [
     label: "Tools & Utilities",
     items: [
       {
-        id: "plugins",
-        label: "Plugins",
-        href: "/plugins",
-        icon: Puzzle,
-        badge: "8",
-        children: [
-          {
-            id: "installed",
-            label: "Plugins đã cài",
-            href: "/plugins",
-            icon: Package,
-          },
-          {
-            id: "add-new",
-            label: "Thêm mới",
-            href: "/plugins",
-            icon: Plus,
-          },
-        ],
-      },
-      {
         id: "api",
         label: "API",
         href: "/api",
@@ -674,12 +652,6 @@ const menuData: MenuSection[] = [
             label: "Third Party",
             href: "/integrations/third-party",
             icon: Globe,
-          },
-          {
-            id: "plugins",
-            label: "Plugins",
-            href: "/integrations/plugins",
-            icon: Plus,
           },
           {
             id: "extensions",

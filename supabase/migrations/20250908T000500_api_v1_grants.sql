@@ -16,3 +16,4 @@ alter default privileges in schema api_v1
 select pg_notify('pgrst', 'reload schema');
 
 
+
