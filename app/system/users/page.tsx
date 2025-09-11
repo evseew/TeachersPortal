@@ -63,6 +63,14 @@ export default function UserManagementPage() {
   
   const { branches, loading: branchesLoading } = useBranches()
 
+  // Подсчет активных фильтров
+  const activeFiltersCount = [
+    selectedRole && selectedRole !== "all" ? selectedRole : null,
+    selectedBranch && selectedBranch !== "all" ? selectedBranch : null, 
+    selectedCategory && selectedCategory !== "all" ? selectedCategory : null,
+    searchTerm
+  ].filter(Boolean).length
+
   useEffect(() => {
     const load = async () => {
       const { listUsers } = await import("@/lib/api/users")
@@ -87,19 +95,36 @@ export default function UserManagementPage() {
     void load()
   }, [])
 
-  // Фильтрация пользователей по поисковому запросу
+  // Фильтрация пользователей по всем критериям
   useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredUsers(users)
-    } else {
-      const filtered = users.filter(user =>
+    let filtered = users
+
+    // Фильтр по поисковому запросу
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(user =>
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (user.branch_name || "").toLowerCase().includes(searchTerm.toLowerCase())
       )
-      setFilteredUsers(filtered)
     }
-  }, [users, searchTerm])
+
+    // Фильтр по роли
+    if (selectedRole && selectedRole !== "all") {
+      filtered = filtered.filter(user => user.role === selectedRole)
+    }
+
+    // Фильтр по филиалу
+    if (selectedBranch && selectedBranch !== "all") {
+      filtered = filtered.filter(user => user.branch_id === selectedBranch)
+    }
+
+    // Фильтр по категории
+    if (selectedCategory && selectedCategory !== "all") {
+      filtered = filtered.filter(user => user.category === selectedCategory)
+    }
+
+    setFilteredUsers(filtered)
+  }, [users, searchTerm, selectedRole, selectedBranch, selectedCategory])
 
   const addUser = async () => {
     // Базовая валидация
@@ -253,6 +278,7 @@ export default function UserManagementPage() {
 
             <Card className="border-0 bg-gradient-to-br from-white to-gray-50 shadow-lg">
               <CardContent className="p-6">
+                {/* Поиск */}
                 <div className="flex items-center space-x-4">
                   <div className="flex-1">
                     <div className="relative">
@@ -265,23 +291,94 @@ export default function UserManagementPage() {
                       />
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="h-12 px-6 border-0 bg-white shadow-sm hover:shadow-md transition-shadow"
-                  >
-                    <Filter className="h-5 w-5 mr-2" />
-                    Filter
-                  </Button>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-0 bg-gradient-to-br from-white to-gray-50 shadow-lg">
               <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-bold flex items-center">
-                  <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
-                  All Users ({filteredUsers.length}{filteredUsers.length !== users.length ? ` of ${users.length}` : ""})
-                </CardTitle>
+                {/* Заголовок и фильтры в одной строке */}
+                <div className="grid grid-cols-12 gap-2 items-center">
+                  {/* Заголовок и badge */}
+                  <div className="col-span-5 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full mr-3"></div>
+                      <h2 className="text-2xl font-bold">
+                        All Users ({filteredUsers.length}{filteredUsers.length !== users.length ? ` of ${users.length}` : ""})
+                      </h2>
+                    </div>
+                    {activeFiltersCount > 0 && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200 ml-3">
+                        {activeFiltersCount} фильтр{activeFiltersCount === 1 ? '' : activeFiltersCount < 5 ? 'а' : 'ов'}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  {/* Фильтр по роли - выровнен с колонкой Role */}
+                  <div className="col-span-2">
+                    <Select value={selectedRole} onValueChange={setSelectedRole}>
+                      <SelectTrigger className="w-full h-10 bg-white shadow-sm">
+                        <SelectValue placeholder="Все роли" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все роли</SelectItem>
+                        {USER_ROLES.map((role) => (
+                          <SelectItem key={role} value={role}>{role}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Фильтр по филиалу - выровнен с колонкой Branch */}
+                  <div className="col-span-2">
+                    <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                      <SelectTrigger className="w-full h-10 bg-white shadow-sm">
+                        <SelectValue placeholder="Все филиалы" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все филиалы</SelectItem>
+                        {branches.map((branch) => (
+                          <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Фильтр по категории - выровнен с колонкой Category */}
+                  <div className="col-span-2">
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="w-full h-10 bg-white shadow-sm">
+                        <SelectValue placeholder="Все категории" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все категории</SelectItem>
+                        {TEACHER_CATEGORIES.map((category) => (
+                          <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Кнопка очистки фильтров - в колонке Actions */}
+                  <div className="col-span-1 flex justify-center">
+                    {activeFiltersCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedRole("")
+                          setSelectedBranch("")
+                          setSelectedCategory("")
+                          setSearchTerm("")
+                        }}
+                        className="h-10 px-3 bg-white shadow-sm hover:shadow-md transition-shadow"
+                        title="Очистить все фильтры"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
