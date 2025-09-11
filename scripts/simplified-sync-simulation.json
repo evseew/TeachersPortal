@@ -1,0 +1,109 @@
+{
+  "timestamp": "2025-09-11T14:53:55.856Z",
+  "strategy": "simplified",
+  "defaultRole": "Regular User",
+  "pyrusUsers": [
+    {
+      "email": "manager7@planetenglish.ru",
+      "name": "Ольга Мельникова",
+      "role": "Regular User",
+      "position": "Оператор Контакт-центра",
+      "department": "КЦ",
+      "source": "pyrus"
+    },
+    {
+      "email": "e.nazarova@planetenglish.ru",
+      "name": "Эльвира Назарова",
+      "role": "Regular User",
+      "position": "Администратор СО",
+      "department": "Отдел продаж",
+      "source": "pyrus"
+    },
+    {
+      "email": "s.saakyan@planetenglish.ru",
+      "name": "Сюзанна Геворговна Саакян",
+      "role": "Regular User",
+      "position": "Преподаватель",
+      "department": "Отдел обучения",
+      "source": "pyrus"
+    },
+    {
+      "email": "zuevkl@gmail.com",
+      "name": "Константин Зуев",
+      "role": "Regular User",
+      "position": "Специалист 1С",
+      "department": "Управляющая компания",
+      "source": "pyrus"
+    },
+    {
+      "email": "l.malyshkina@planetenglish.ru",
+      "name": "Луиза Владиславовна Малышкина",
+      "role": "Regular User",
+      "source": "pyrus"
+    }
+  ],
+  "syncResults": {
+    "toAdd": [
+      {
+        "email": "manager7@planetenglish.ru",
+        "name": "Ольга Мельникова",
+        "role": "Regular User",
+        "position": "Оператор Контакт-центра",
+        "department": "КЦ",
+        "category": null,
+        "branch_id": null
+      },
+      {
+        "email": "e.nazarova@planetenglish.ru",
+        "name": "Эльвира Назарова",
+        "role": "Regular User",
+        "position": "Администратор СО",
+        "department": "Отдел продаж",
+        "category": null,
+        "branch_id": null
+      },
+      {
+        "email": "s.saakyan@planetenglish.ru",
+        "name": "Сюзанна Геворговна Саакян",
+        "role": "Regular User",
+        "position": "Преподаватель",
+        "department": "Отдел обучения",
+        "category": null,
+        "branch_id": null
+      },
+      {
+        "email": "zuevkl@gmail.com",
+        "name": "Константин Зуев",
+        "role": "Regular User",
+        "position": "Специалист 1С",
+        "department": "Управляющая компания",
+        "category": null,
+        "branch_id": null
+      },
+      {
+        "email": "l.malyshkina@planetenglish.ru",
+        "name": "Луиза Владиславовна Малышкина",
+        "role": "Regular User",
+        "category": null,
+        "branch_id": null
+      }
+    ],
+    "toUpdate": [],
+    "toDelete": [],
+    "unchanged": []
+  },
+  "departmentStats": {
+    "КЦ": 1,
+    "Отдел продаж": 1,
+    "Отдел обучения": 1,
+    "Управляющая компания": 1,
+    "Без отдела": 1
+  },
+  "adminInstructions": "После синхронизации администратор должен вручную назначить правильные роли всем пользователям",
+  "summary": {
+    "toAdd": 5,
+    "toUpdate": 0,
+    "toDelete": 0,
+    "unchanged": 0
+  }
+}

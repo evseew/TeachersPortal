@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-09-11T14:57:39.838Z",
+  "pyrusConnection": true,
+  "usersRetrieved": 132,
+  "sampleUsers": [
+    {
+      "email": "manager7@planetenglish.ru",
+      "full_name": "Ольга Мельникова",
+      "role": "Salesman",
+      "position": "Оператор Контакт-центра",
+      "department": "КЦ"
+    },
+    {
+      "email": "e.nazarova@planetenglish.ru",
+      "full_name": "Эльвира Назарова",
+      "role": "Salesman",
+      "position": "Администратор СО",
+      "department": "Отдел продаж"
+    },
+    {
+      "email": "s.saakyan@planetenglish.ru",
+      "full_name": "Сюзанна Геворговна Саакян",
+      "role": "Salesman",
+      "position": "Преподаватель",
+      "department": "Отдел обучения"
+    }
+  ],
+  "readyForSync": false,
+  "missingComponents": [
+    "Роль Regular User в БД"
+  ],
+  "recommendations": "Добавить роль Regular User в БД"
+}

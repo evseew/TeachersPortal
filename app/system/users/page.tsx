@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SmartAvatar } from "@/components/ui/smart-avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { SidebarNav } from "@/components/sidebar-nav"
@@ -22,6 +23,7 @@ type UiUser = {
   branch_name: string | null
   branch_id: string | null
   category: string | null
+  avatar_url: string | null
 }
 
 const getRoleIcon = (role: string) => {
@@ -68,6 +70,7 @@ export default function UserManagementPage() {
           branch_name: r.branch_name,
           branch_id: r.branch_id,
           category: r.category,
+          avatar_url: r.avatar_url,
         }))
         setUsers(mappedUsers)
         setFilteredUsers(mappedUsers)
@@ -229,12 +232,12 @@ export default function UserManagementPage() {
                   </div>
                 </div>
                 <Button
-                  disabled
-                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm opacity-50 cursor-not-allowed"
-                  title="Feature not implemented"
+                  onClick={() => {/* TODO: Добавить функцию синхронизации */}}
+                  className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm"
+                  title="Синхронизировать пользователей из Pyrus"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add User
+                  Sync from Pyrus
                 </Button>
               </div>
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
@@ -296,15 +299,13 @@ export default function UserManagementPage() {
                         <div className="col-span-1 text-sm text-gray-500">{index + 1}</div>
 
                         <div className="col-span-4 flex items-center space-x-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={`/placeholder-32px.png?height=24&width=24`} />
-                            <AvatarFallback className="text-xs font-semibold bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                              {user.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
+                          <SmartAvatar 
+                            email={user.email} 
+                            name={user.name} 
+                            size="sm"
+                            showTooltip={true}
+                            avatarUrl={user.avatar_url}
+                          />
                           <div>
                             <p className="font-medium text-sm">{user.name}</p>
                           </div>

@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     const q = (searchParams.get("q") ?? "").toLowerCase()
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("user_id, email, full_name, role, category, branch_id, branch:branch_id(name)")
+      .select("user_id, email, full_name, role, category, branch_id, avatar_url, branch:branch_id(name)")
       .order("full_name", { ascending: true })
     if (error) throw error
     const mapped = (data ?? []).map((r: any) => ({
@@ -17,6 +17,7 @@ export async function GET(request: Request) {
       role: r.role,
       category: r.category,
       branch_id: r.branch_id,
+      avatar_url: r.avatar_url,
       branch_name: r.branch?.name ?? null,
     }))
     const filtered = q

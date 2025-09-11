@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-09-11T14:43:07.658Z",
+  "summary": {
+    "total": 4,
+    "success": 4,
+    "failed": 0
+  },
+  "results": [
+    {
+      "test": "Тест 1: Авторизация в Pyrus",
+      "status": "SUCCESS",
+      "duration": 325,
+      "message": "Завершен за 325ms"
+    },
+    {
+      "test": "Тест 2: Получение пользователей",
+      "status": "SUCCESS",
+      "duration": 250,
+      "message": "Завершен за 250ms"
+    },
+    {
+      "test": "Тест 3: Сопоставление ролей",
+      "status": "SUCCESS",
+      "duration": 31,
+      "message": "Завершен за 31ms"
+    },
+    {
+      "test": "Тест 4: Симуляция синхронизации",
+      "status": "SUCCESS",
+      "duration": 30,
+      "message": "Завершен за 30ms"
+    }
+  ]
+}

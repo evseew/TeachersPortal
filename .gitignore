@@ -40,3 +40,6 @@ next-env.d.ts
 # Logs
 *.log
 server.log
+
+#Reference 
+reference.md

@@ -8,6 +8,7 @@ export type UserRow = {
   category: TeacherCategory | null
   branch_id: string | null
   branch_name: string | null
+  avatar_url: string | null
 }
 
 export async function listUsers(q?: string): Promise<UserRow[]> {
