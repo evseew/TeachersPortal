@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
+import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
 
 export async function GET(request: Request) {
+  // Проверяем авторизацию
+  const authError = await requireAuth()
+  if (authError) return authError
+  
+  // Проверяем роль (Admin или Head of Sales могут просматривать пользователей)
+  const hasPermission = await hasServerRole(["Administrator", "Head of Sales"])
+  if (!hasPermission) {
+    return NextResponse.json(
+      { error: "Недостаточно прав для просмотра пользователей" }, 
+      { status: 403 }
+    )
+  }
   try {
     const { searchParams } = new URL(request.url)
     const q = (searchParams.get("q") ?? "").toLowerCase()

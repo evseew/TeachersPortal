@@ -21,9 +21,24 @@ export const authOptions: NextAuthOptions = {
       return domain === allowedDomain
     },
     async session({ session, token }) {
-      // Роль/ветка будут подтягиваться позже из БД; пока прокидываем email
       if (session?.user && token?.email) {
         session.user.email = token.email as string
+        
+        // Получаем роль пользователя из БД
+        try {
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('email', token.email)
+            .single()
+          
+          if (profile) {
+            session.user.role = profile.role
+          }
+        } catch (error) {
+          console.error("Ошибка получения роли:", error)
+          // Если не удалось получить роль, оставляем undefined
+        }
       }
       return session
     },
@@ -59,6 +74,10 @@ export const authOptions: NextAuthOptions = {
         console.error("ensure_profile failed:", error)
       }
     },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/auth/error',
   },
   session: {
     strategy: "jwt",

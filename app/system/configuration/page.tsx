@@ -27,6 +27,12 @@ const initialUserRoles = [
     description: "Sales team leadership and analytics",
     color: "bg-orange-100 text-orange-800",
   },
+  {
+    id: 6,
+    name: "Regular User",
+    description: "Basic user from Pyrus sync, awaiting role assignment",
+    color: "bg-gray-100 text-gray-800",
+  },
 ]
 
 const systemSections = [
@@ -41,6 +47,7 @@ const initialPermissions = {
   Teacher: [1],
   Salesman: [1],
   "Head of Sales": [1, 3],
+  "Regular User": [], // Нет доступа к модулям, только профиль
 }
 
 const PermissionCheckbox = ({ checked, onToggle }: { checked: boolean; onToggle: () => void }) => {

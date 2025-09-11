@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useUserRole, RoleGuard } from "@/hooks/use-user-role"
 
 const modules = [
   {
@@ -13,6 +14,7 @@ const modules = [
     icon: Trophy,
     href: "/september-rating",
     active: true,
+    requiresPath: "/september-rating",
     subpages: [
       { name: "Branch Leaderboard", icon: Trophy, href: "/september-rating/branch-leaderboard" },
       { name: "Teacher Leaderboard", icon: Trophy, href: "/september-rating/teacher-leaderboard" },
@@ -23,6 +25,7 @@ const modules = [
     icon: Edit3,
     href: "/mass-kpi-input",
     active: false,
+    requiresPath: "/mass-kpi-input",
     subpages: [{ name: "September Rating", icon: Edit3, href: "/mass-kpi-input/september-rating" }],
   },
   {
@@ -31,6 +34,7 @@ const modules = [
     href: "/newcomers-rating",
     active: false,
     placeholder: true,
+    requiresPath: "/newcomers-rating",
     subpages: [],
   },
   {
@@ -38,10 +42,11 @@ const modules = [
     icon: Settings,
     href: "/system",
     active: false,
+    requiresPath: "/system",
     subpages: [
-      { name: "User Management", icon: Users, href: "/system/users" },
-      { name: "System Settings", icon: Settings, href: "/system/settings" },
-      { name: "Configuration", icon: Settings, href: "/system/configuration" },
+      { name: "User Management", icon: Users, href: "/system/users", requiresPath: "/system/users" },
+      { name: "System Settings", icon: Settings, href: "/system/settings", requiresPath: "/system/settings" },
+      { name: "Configuration", icon: Settings, href: "/system/configuration", requiresPath: "/system/configuration" },
     ],
   },
 ]
@@ -50,6 +55,7 @@ function SidebarNav() {
   const [collapsed, setCollapsed] = useState(false)
   const [expandedModules, setExpandedModules] = useState<string[]>(["September Rating"])
   const pathname = usePathname()
+  const { hasAccess } = useUserRole()
 
   useEffect(() => {
     // Check if current path matches any subpage and auto-expand parent module
@@ -103,6 +109,11 @@ function SidebarNav() {
           const hasSubpages = module.subpages && module.subpages.length > 0
           const isExpanded = expandedModules.includes(module.name)
           const moduleActive = isActive(module.href)
+          
+          // Проверяем доступ к модулю
+          if (module.requiresPath && !hasAccess(module.requiresPath)) {
+            return null
+          }
 
           return (
             <div key={module.name}>
@@ -144,6 +155,11 @@ function SidebarNav() {
                   {module.subpages.map((subpage) => {
                     const SubIcon = subpage.icon
                     const subpageActive = isActive(subpage.href)
+                    
+                    // Проверяем доступ к подстранице
+                    if ((subpage as any).requiresPath && !hasAccess((subpage as any).requiresPath)) {
+                      return null
+                    }
 
                     return (
                       <Link

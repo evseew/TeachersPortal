@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { USER_ROLES, TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
+import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  // Проверяем авторизацию
+  const authError = await requireAuth()
+  if (authError) return authError
+  
+  // Только администратор может редактировать пользователей
+  const hasPermission = await hasServerRole(["Administrator"])
+  if (!hasPermission) {
+    return NextResponse.json(
+      { error: "Недостаточно прав для редактирования пользователей" }, 
+      { status: 403 }
+    )
+  }
   try {
     const body = await request.json()
     const id = params.id

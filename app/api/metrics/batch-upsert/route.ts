@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
+import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
 
 export async function POST(request: Request) {
+  // Проверяем авторизацию
+  const authError = await requireAuth()
+  if (authError) return authError
+  
+  // Только Admin и Senior Teacher могут вводить KPI
+  const hasPermission = await hasServerRole(["Administrator", "Senior Teacher"])
+  if (!hasPermission) {
+    return NextResponse.json(
+      { error: "Недостаточно прав для ввода KPI" }, 
+      { status: 403 }
+    )
+  }
   try {
     const body = await request.json()
     const rows = Array.isArray(body) ? body : body?.rows
