@@ -30,4 +30,15 @@ export async function updateUser(id: string, updates: Partial<Pick<UserRow, "rol
   }
 }
 
+export async function deleteUser(id: string) {
+  const res = await fetch(`/api/system/users/${id}`, {
+    method: "DELETE",
+  })
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}))
+    throw new Error(e?.error ?? `Failed to delete user (${res.status})`)
+  }
+  return await res.json()
+}
+
 

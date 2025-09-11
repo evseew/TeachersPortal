@@ -76,4 +76,57 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 }
 
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    const id = params.id
+    
+    // Проверяем, существует ли пользователь
+    const { data: user, error: fetchError } = await supabaseAdmin
+      .from("profiles")
+      .select("user_id, email, role")
+      .eq("user_id", id)
+      .single()
+    
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        return NextResponse.json({ error: "User not found" }, { status: 404 })
+      }
+      throw fetchError
+    }
+    
+    // Проверяем, можно ли удалить пользователя
+    // Например, нельзя удалить последнего администратора
+    if (user.role === "Administrator") {
+      const { data: adminCount, error: countError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id", { count: "exact" })
+        .eq("role", "Administrator")
+      
+      if (countError) throw countError
+      
+      if ((adminCount as any[])?.length <= 1) {
+        return NextResponse.json({ 
+          error: "Cannot delete the last administrator" 
+        }, { status: 400 })
+      }
+    }
+    
+    // Удаляем пользователя (каскадное удаление настроено через FK constraints)
+    const { error } = await supabaseAdmin
+      .from("profiles")
+      .delete()
+      .eq("user_id", id)
+    
+    if (error) throw error
+    
+    return NextResponse.json({ 
+      ok: true, 
+      message: `User ${user.email} deleted successfully` 
+    })
+  } catch (error: any) {
+    console.error("DELETE /api/system/users/[id]", error)
+    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+  }
+}
+
 
