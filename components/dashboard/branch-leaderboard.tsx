@@ -40,12 +40,22 @@ function getRankIcon(rank: number) {
 
 function DeltaArrow({ delta }: { delta: number }) {
   const isPositive = delta > 0
+  const isZero = delta === 0
+  
+  if (isZero) {
+    return (
+      <span className="text-xs text-muted-foreground font-medium">
+        0.0
+      </span>
+    )
+  }
+  
   return (
     <div
-      className={`flex items-center space-x-1 px-2 py-1 rounded-full text-sm font-semibold ${
+      className={`flex items-center space-x-1 text-xs font-medium ${
         isPositive
-          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+          ? "text-green-600 dark:text-green-400"
+          : "text-red-600 dark:text-red-400"
       }`}
     >
       {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -202,7 +212,7 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
               </div>
 
               <div className="mt-4">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-3">
                   <div className="text-lg font-bold text-foreground">{Number(branch.score) || 0}</div>
                   <DeltaArrow delta={Number(branch.delta_score ?? 0)} />
                 </div>
@@ -259,13 +269,13 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full table-fixed">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Rank</th>
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Branch</th>
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Score</th>
-                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Delta</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-16">Rank</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-48">Branch</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-20">Score</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-16">Delta</th>
                   <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Prize</th>
                 </tr>
               </thead>
@@ -290,42 +300,44 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
                     <td className="py-4 px-4">{getRankIcon(branch.rank)}</td>
                     <td className="py-4 px-4 font-semibold text-foreground text-lg">{branch.branch_name}</td>
                     <td className="py-4 px-4">
+                      <div className="text-lg font-bold text-foreground">{Number(branch.score) || 0}</div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <DeltaArrow delta={Number(branch.delta_score ?? 0)} />
+                    </td>
+                    <td className="py-4 px-4">
                       <div className="flex items-center space-x-2">
-                        <div className="text-lg font-bold text-foreground">{Number(branch.score) || 0}</div>
-                        <DeltaArrow delta={Number(branch.delta_score ?? 0)} />
+                        {"prize" in branch ? (
+                          <Badge variant="secondary" className="bg-[#A4C736]/20 text-[#A4C736]">
+                            {branch.prize}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                        <div className="ml-2">
+                          {branch.rank === 1 && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/interactive-display-KRMU5BhAMPQzJ2DE6yAchluZ5XCkzW.png"
+                              alt="Interactive Display"
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
+                          {(branch.rank === 2 || branch.rank === 3) && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-machine-UCVH6mj1RvihthjwF5eaTJjt0wQa20.png"
+                              alt="Coffee Machine"
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
+                          {(branch.rank === 4 || branch.rank === 5) && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/money-kC8Gze9OyIKMDB4CK4hDWJfcBrBH4i.png"
+                              alt="Money Prize"
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
+                        </div>
                       </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      {"prize" in branch ? (
-                        <Badge variant="secondary" className="bg-[#A4C736]/20 text-[#A4C736]">
-                          {branch.prize}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-4">
-                      {branch.rank === 1 && (
-                        <img
-                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/interactive-display-KRMU5BhAMPQzJ2DE6yAchluZ5XCkzW.png"
-                          alt="Interactive Display"
-                          className="h-8 w-8 object-contain"
-                        />
-                      )}
-                      {(branch.rank === 2 || branch.rank === 3) && (
-                        <img
-                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-machine-UCVH6mj1RvihthjwF5eaTJjt0wQa20.png"
-                          alt="Coffee Machine"
-                          className="h-8 w-8 object-contain"
-                        />
-                      )}
-                      {(branch.rank === 4 || branch.rank === 5) && (
-                        <img
-                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/money-kC8Gze9OyIKMDB4CK4hDWJfcBrBH4i.png"
-                          alt="Money Prize"
-                          className="h-8 w-8 object-contain"
-                        />
-                      )}
                     </td>
                   </tr>
                 ))}

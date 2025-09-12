@@ -8,6 +8,13 @@ export default withAuth(
     const { pathname } = req.nextUrl
     const userRole = req.nextauth.token?.role as UserRole | undefined
     
+    // Проверяем, отключена ли авторизация
+    const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
+    if (!authEnabled) {
+      console.log(`🚫 Auth отключена - пропускаем все маршруты: ${pathname}`)
+      return NextResponse.next()
+    }
+    
     // Пропускаем публичные страницы и API маршруты
     if (
       pathname.startsWith('/auth/') ||
@@ -38,6 +45,12 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
+        
+        // Проверяем, отключена ли авторизация
+        const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
+        if (!authEnabled) {
+          return true
+        }
         
         // Пропускаем публичные страницы
         if (

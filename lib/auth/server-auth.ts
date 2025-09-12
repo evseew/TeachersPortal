@@ -22,6 +22,12 @@ export async function getServerUserRole(): Promise<UserRole | null> {
  * Проверяет, имеет ли пользователь одну из разрешенных ролей
  */
 export async function hasServerRole(allowedRoles: UserRole[]): Promise<boolean> {
+  // Проверяем, отключена ли авторизация
+  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
+  if (!authEnabled) {
+    return true // Если авторизация отключена, разрешаем все
+  }
+  
   const userRole = await getServerUserRole()
   return userRole !== null && allowedRoles.includes(userRole)
 }
@@ -63,6 +69,12 @@ export function requireRole(allowedRoles: UserRole[]) {
  * Проверяет авторизацию пользователя (наличие сессии)
  */
 export async function requireAuth() {
+  // Проверяем, отключена ли авторизация
+  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
+  if (!authEnabled) {
+    return null // Если авторизация отключена, пропускаем проверку
+  }
+  
   const session = await getServerUserSession()
   
   if (!session?.user?.email) {

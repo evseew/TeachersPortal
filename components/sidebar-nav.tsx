@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Trophy, Settings, Sh
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useUserRole, RoleGuard } from "@/hooks/use-user-role"
 
 const modules = [
@@ -55,6 +55,7 @@ function SidebarNav() {
   const [collapsed, setCollapsed] = useState(false)
   const [expandedModules, setExpandedModules] = useState<string[]>(["September Rating"])
   const pathname = usePathname()
+  const router = useRouter()
   const { hasAccess } = useUserRole()
 
   useEffect(() => {
@@ -73,6 +74,24 @@ function SidebarNav() {
     setExpandedModules((prev) =>
       prev.includes(moduleName) ? prev.filter((name) => name !== moduleName) : [...prev, moduleName],
     )
+  }
+
+  const handleModuleClick = (module: any, event: React.MouseEvent) => {
+    event.preventDefault()
+    
+    // Всегда переходим на главную страницу модуля
+    router.push(module.href)
+    
+    // Если есть подстраницы, всегда раскрываем подменю
+    if (module.subpages && module.subpages.length > 0) {
+      // Убеждаемся, что модуль точно добавлен в expandedModules
+      setExpandedModules((prev) => {
+        if (!prev.includes(module.name)) {
+          return [...prev, module.name]
+        }
+        return prev
+      })
+    }
   }
 
   const isActive = (href: string) => {
@@ -120,20 +139,19 @@ function SidebarNav() {
               {/* Main module item */}
               <div
                 className={cn(
-                  "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                  "flex items-center justify-between px-3 py-2 rounded-lg transition-colors",
                   moduleActive
                     ? // Fixed contrast by using darker green text and slightly more opaque background
                       "bg-[#A4C736]/15 text-[#5A7020] border-l-4 border-[#A4C736] dark:bg-[#A4C736]/20 dark:text-[#A4C736]"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                  module.placeholder && "opacity-50 cursor-not-allowed",
+                  module.placeholder && "opacity-50",
                 )}
-                onClick={() => {
-                  if (hasSubpages && !collapsed) {
-                    toggleModule(module.name)
-                  }
-                }}
               >
-                <Link href={module.href} className="flex items-center space-x-3 flex-1">
+                <Link 
+                  href={module.href} 
+                  className="flex items-center space-x-3 flex-1 cursor-pointer"
+                  onClick={(e) => handleModuleClick(module, e)}
+                >
                   <Icon className="h-5 w-5 flex-shrink-0" />
                   {!collapsed && (
                     <span className="font-medium">
@@ -143,9 +161,16 @@ function SidebarNav() {
                   )}
                 </Link>
                 {hasSubpages && !collapsed && (
-                  <div className="ml-2">
+                  <button
+                    className="ml-2 p-1 hover:bg-black/5 rounded transition-colors"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      toggleModule(module.name)
+                    }}
+                  >
                     {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </div>
+                  </button>
                 )}
               </div>
 

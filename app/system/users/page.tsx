@@ -48,6 +48,13 @@ export default function UserManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("")
   
   const [editingUser, setEditingUser] = useState<UiUser | null>(null)
+  const [newUser, setNewUser] = useState({
+    name: "",
+    email: "",
+    role: "",
+    branch_id: "",
+    category: "",
+  })
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)

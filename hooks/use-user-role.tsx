@@ -10,6 +10,9 @@ import { hasAccess, isReadOnlyAccess, getAccessibleModules } from "@/lib/auth/pe
 export function useUserRole() {
   const { data: session, status } = useSession()
   const userRole = session?.user?.role as UserRole | undefined
+  
+  // Проверяем, отключена ли авторизация
+  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
 
   return {
     // Базовая информация
@@ -17,10 +20,10 @@ export function useUserRole() {
     isLoading: status === "loading",
     isAuthenticated: status === "authenticated",
     
-    // Проверки доступа
-    hasAccess: (path: string) => hasAccess(userRole, path),
-    isReadOnlyAccess: (path: string) => isReadOnlyAccess(userRole, path),
-    getAccessibleModules: () => getAccessibleModules(userRole),
+    // Проверки доступа - если авторизация отключена, разрешаем все
+    hasAccess: (path: string) => authEnabled ? hasAccess(userRole, path) : true,
+    isReadOnlyAccess: (path: string) => authEnabled ? isReadOnlyAccess(userRole, path) : false,
+    getAccessibleModules: () => authEnabled ? getAccessibleModules(userRole) : [],
     
     // Проверки конкретных ролей
     isAdmin: userRole === "Administrator",
@@ -56,6 +59,14 @@ export function RoleGuard({
   fallback = null 
 }: RoleGuardProps) {
   const { userRole, hasAccess: checkAccess } = useUserRole()
+  
+  // Проверяем, отключена ли авторизация
+  const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
+  
+  // Если авторизация отключена, показываем содержимое
+  if (!authEnabled) {
+    return <>{children}</>
+  }
   
   // Если указаны разрешенные роли, проверяем их
   if (allowedRoles) {

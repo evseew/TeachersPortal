@@ -19,6 +19,8 @@ export function LoginForm() {
       if (!enabled) {
         setError("Auth отключена локально. Продолжайте без входа.")
         setIsLoading(false)
+        // Перенаправляем на главную страницу приложения
+        window.location.href = "/dashboard"
         return
       }
       await signIn("google", { callbackUrl: "/september-rating" })
