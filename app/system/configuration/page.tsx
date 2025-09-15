@@ -180,10 +180,13 @@ export default function SystemConfigurationPage() {
       )
 
       if (oldRole.name !== editRole.name) {
-        const updatedPermissions = { ...permissions }
-        updatedPermissions[editRole.name] = updatedPermissions[oldRole.name]
-        delete updatedPermissions[oldRole.name]
-        setPermissions(updatedPermissions)
+        const updatedPermissions = { ...permissions } as Record<string, number[]>
+        // Безопасное копирование прав для переименованной роли
+        if (oldRole.name in updatedPermissions) {
+          updatedPermissions[editRole.name] = updatedPermissions[oldRole.name]
+          delete updatedPermissions[oldRole.name]
+          setPermissions(updatedPermissions as typeof permissions)
+        }
       }
     }
     setEditingRole(null)
@@ -198,17 +201,22 @@ export default function SystemConfigurationPage() {
     const roleToDelete = userRoles.find((r) => r.id === id)
     if (roleToDelete) {
       setUserRoles(userRoles.filter((role) => role.id !== id))
-      const updatedPermissions = { ...permissions }
+      const updatedPermissions = { ...permissions } as Record<string, number[]>
       delete updatedPermissions[roleToDelete.name]
-      setPermissions(updatedPermissions)
+      setPermissions(updatedPermissions as typeof permissions)
     }
   }
 
   const togglePermission = (role: string, sectionId: number) => {
-    setPermissions((prev) => ({
-      ...prev,
-      [role]: prev[role].includes(sectionId) ? prev[role].filter((id) => id !== sectionId) : [...prev[role], sectionId],
-    }))
+    setPermissions((prev) => {
+      const prevAsRecord = prev as Record<string, number[]>
+      return {
+        ...prev,
+        [role]: prevAsRecord[role]?.includes(sectionId) 
+          ? prevAsRecord[role].filter((id) => id !== sectionId) 
+          : [...(prevAsRecord[role] || []), sectionId],
+      } as typeof prev
+    })
   }
 
   const isBranchFormValid = newBranch.name.trim().length > 0 && newBranch.name.trim().length <= 100
@@ -533,7 +541,7 @@ export default function SystemConfigurationPage() {
 
                         <div className="col-span-1 flex items-center">
                           <span className="text-sm font-medium text-[#7A9B28]">
-                            {permissions[role.name]?.length || 0}
+                            {(permissions as Record<string, number[]>)[role.name]?.length || 0}
                           </span>
                         </div>
 
@@ -619,7 +627,7 @@ export default function SystemConfigurationPage() {
                           {userRoles.map((role) => (
                             <td key={role.id} className="py-4 px-4 text-center">
                               <PermissionCheckbox
-                                checked={permissions[role.name]?.includes(section.id) || false}
+                                checked={(permissions as Record<string, number[]>)[role.name]?.includes(section.id) || false}
                                 onToggle={() => togglePermission(role.name, section.id)}
                               />
                             </td>

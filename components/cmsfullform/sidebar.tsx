@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 import {
   BarChart2,
   Receipt,
@@ -816,7 +816,7 @@ export default function Sidebar() {
         }}
         title={menuState === "collapsed" && !isHovered && !isMobile ? item.label : undefined}
       >
-        <item.icon className="h-4 w-4 flex-shrink-0 sidebar-menu-icon" />
+        {item.icon && React.createElement(item.icon, { className: "h-4 w-4 flex-shrink-0 sidebar-menu-icon" })}
 
         {showText && (
           <>

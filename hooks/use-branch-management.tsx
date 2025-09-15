@@ -148,11 +148,13 @@ export function useBranchManagement() {
       return false
     }
 
+    // Сохраняем старое имя для отката в случае ошибки
+    const oldName = state.branches.find(b => b.id === branchId)?.name
+    
     try {
       setState(prev => ({ ...prev, isSubmitting: true }))
       
       // Optimistic update
-      const oldName = state.branches.find(b => b.id === branchId)?.name
       setState(prev => ({ 
         ...prev, 
         branches: prev.branches.map(b => 
@@ -202,11 +204,13 @@ export function useBranchManagement() {
     const branch = state.branches.find(b => b.id === branchId)
     if (!branch) return false
 
+    // Сохраняем старое состояние для отката в случае ошибки
+    const oldBranches = state.branches
+    
     try {
       setState(prev => ({ ...prev, isSubmitting: true }))
       
       // Optimistic update
-      const oldBranches = state.branches
       setState(prev => ({ 
         ...prev, 
         branches: prev.branches.filter(b => b.id !== branchId)

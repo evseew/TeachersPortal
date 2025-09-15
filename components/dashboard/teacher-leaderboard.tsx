@@ -126,13 +126,13 @@ export function TeacherLeaderboard({ showOnlyCards = false }: TeacherLeaderboard
   if (showOnlyCards) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-        {(loading ? Array.from({ length: 12 }).map((_, i) => (
+        {loading ? Array.from({ length: 12 }).map((_, i) => (
           <Card key={`skeleton-${i}`} className={`border-2 border-muted`}>
             <CardContent className="p-4">
               <div className="h-24 animate-pulse bg-muted rounded" />
             </CardContent>
           </Card>
-        )) : source.slice(0, 12)).map((teacher) => (
+        )) : source.slice(0, 12).map((teacher) => (
           <Card
             key={teacher.rank}
             className={`hover:shadow-xl transition-shadow cursor-pointer border-2 border-muted`}

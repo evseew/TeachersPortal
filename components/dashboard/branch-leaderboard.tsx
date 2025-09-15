@@ -269,14 +269,14 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full table-auto min-w-[800px]">
+            <table className="w-full table-fixed">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
-                  <th className="text-center py-3 px-6 font-semibold text-muted-foreground w-20">Rank</th>
-                  <th className="text-left py-3 px-6 font-semibold text-muted-foreground min-w-[200px]">Branch</th>
-                  <th className="text-center py-3 px-6 font-semibold text-muted-foreground w-24">Score</th>
-                  <th className="text-center py-3 px-6 font-semibold text-muted-foreground w-24">Delta</th>
-                  <th className="text-center py-3 px-6 font-semibold text-muted-foreground min-w-[150px]">Prize</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-16">Rank</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-48">Branch</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-20">Score</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground w-16">Delta</th>
+                  <th className="text-left py-3 px-4 font-semibold text-muted-foreground">Prize</th>
                 </tr>
               </thead>
               <tbody>
@@ -297,53 +297,45 @@ export function BranchLeaderboard({ showOnlyCards = false }: BranchLeaderboardPr
                     key={branch.rank}
                     className="border-b border-border/50 hover:bg-gradient-to-r hover:from-[#A4C736]/5 hover:to-transparent transition-colors"
                   >
-                    <td className="py-4 px-6 text-center">
-                      <div className="flex justify-center">
-                        {getRankIcon(branch.rank)}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6 font-semibold text-foreground text-lg">{branch.branch_name}</td>
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-4 px-4">{getRankIcon(branch.rank)}</td>
+                    <td className="py-4 px-4 font-semibold text-foreground text-lg">{branch.branch_name}</td>
+                    <td className="py-4 px-4">
                       <div className="text-lg font-bold text-foreground">{Number(branch.score) || 0}</div>
                     </td>
-                    <td className="py-4 px-6 text-center">
-                      <div className="flex justify-center">
-                        <DeltaArrow delta={Number(branch.delta_score ?? 0)} />
-                      </div>
+                    <td className="py-4 px-4">
+                      <DeltaArrow delta={Number(branch.delta_score ?? 0)} />
                     </td>
-                    <td className="py-4 px-6">
-                      <div className="flex items-center justify-center space-x-3">
-                        <div className="flex flex-col items-center space-y-1">
-                          {"prize" in branch ? (
-                            <Badge variant="secondary" className="bg-[#A4C736]/20 text-[#A4C736] whitespace-nowrap">
-                              {branch.prize}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center space-x-2">
+                        {"prize" in branch ? (
+                          <Badge variant="secondary" className="bg-[#A4C736]/20 text-[#A4C736]">
+                            {branch.prize}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                        <div className="ml-2">
+                          {branch.rank === 1 && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/interactive-display-KRMU5BhAMPQzJ2DE6yAchluZ5XCkzW.png"
+                              alt="Interactive Display"
+                              className="h-8 w-8 object-contain"
+                            />
                           )}
-                          <div>
-                            {branch.rank === 1 && (
-                              <img
-                                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/interactive-display-KRMU5BhAMPQzJ2DE6yAchluZ5XCkzW.png"
-                                alt="Interactive Display"
-                                className="h-8 w-8 object-contain"
-                              />
-                            )}
-                            {(branch.rank === 2 || branch.rank === 3) && (
-                              <img
-                                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-machine-UCVH6mj1RvihthjwF5eaTJjt0wQa20.png"
-                                alt="Coffee Machine"
-                                className="h-8 w-8 object-contain"
-                              />
-                            )}
-                            {(branch.rank === 4 || branch.rank === 5) && (
-                              <img
-                                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/money-kC8Gze9OyIKMDB4CK4hDWJfcBrBH4i.png"
-                                alt="Money Prize"
-                                className="h-8 w-8 object-contain"
-                              />
-                            )}
-                          </div>
+                          {(branch.rank === 2 || branch.rank === 3) && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/coffee-machine-UCVH6mj1RvihthjwF5eaTJjt0wQa20.png"
+                              alt="Coffee Machine"
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
+                          {(branch.rank === 4 || branch.rank === 5) && (
+                            <img
+                              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/money-kC8Gze9OyIKMDB4CK4hDWJfcBrBH4i.png"
+                              alt="Money Prize"
+                              className="h-8 w-8 object-contain"
+                            />
+                          )}
                         </div>
                       </div>
                     </td>

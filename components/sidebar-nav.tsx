@@ -196,13 +196,11 @@ function SidebarNav() {
                             ? // Fixed contrast for subpages with darker green text
                               "bg-[#A4C736]/15 text-[#5A7020] border-l-4 border-[#A4C736] dark:bg-[#A4C736]/20 dark:text-[#A4C736]"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted",
-                          subpage.placeholder && "opacity-50 cursor-not-allowed pointer-events-none",
                         )}
                       >
                         <SubIcon className="h-4 w-4 flex-shrink-0" />
                         <span className="font-medium">
                           {subpage.name}
-                          {subpage.placeholder && " (Coming Soon)"}
                         </span>
                       </Link>
                     )

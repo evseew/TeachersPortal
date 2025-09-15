@@ -13,6 +13,7 @@ interface SystemEvent {
     | "security_scan"
     | "cache_cleared"
     | "database_optimized"
+    | "plugin_installed"
   target: string
   user: string
   timestamp: string

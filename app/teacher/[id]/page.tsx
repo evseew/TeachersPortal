@@ -199,7 +199,7 @@ export default function TeacherDetailPage() {
                         <span>{Math.abs(Number(teacher.delta_rank ?? 0))}</span>
                       </div>
                     </div>
-                    <Badge className={getCategoryColor(teacher.category ?? "")} variant="secondary" size="sm">
+                    <Badge className={getCategoryColor(teacher.category ?? "")} variant="secondary">
                       {teacher.category ?? "Unknown"}
                     </Badge>
                   </div>
@@ -223,7 +223,7 @@ export default function TeacherDetailPage() {
                         <span>{Math.abs(Number(teacher.delta_rank ?? 0))}</span>
                       </div>
                     </div>
-                    <Badge variant="outline" size="sm" className="text-xs">
+                    <Badge variant="outline" className="text-xs">
                       {teacher.branch_name ?? ""}
                     </Badge>
                   </div>

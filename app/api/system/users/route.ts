@@ -2,6 +2,9 @@ import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
 
+// Принудительно делаем route динамическим для обработки авторизации
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: Request) {
   // Проверяем авторизацию
   const authError = await requireAuth()
@@ -16,6 +19,7 @@ export async function GET(request: Request) {
     )
   }
   try {
+    // Получаем параметры поиска
     const { searchParams } = new URL(request.url)
     const q = (searchParams.get("q") ?? "").toLowerCase()
     const { data, error } = await supabaseAdmin

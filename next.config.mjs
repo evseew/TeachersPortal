@@ -1,18 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Production-ready configuration
   typescript: {
-    // Temporarily disable TypeScript errors during build
-    ignoreBuildErrors: true,
+    // Enable TypeScript error checking during build
+    ignoreBuildErrors: false,
   },
   eslint: {
-    // Disable ESLint during build
-    ignoreDuringBuilds: true,
+    // Enable ESLint during build for code quality
+    ignoreDuringBuilds: false,
   },
   experimental: {
-    // Disable some experimental features that might cause issues
-    esmExternals: false,
-    serverComponentsExternalPackages: []
-  }
+    // Use recommended settings for better performance
+    esmExternals: 'loose',
+    serverComponentsExternalPackages: ['supabase']
+  },
+  // Enable additional optimizations
+  poweredByHeader: false,
+  reactStrictMode: true,
 }
 
 export default nextConfig

@@ -7,7 +7,7 @@ export const supabaseAdmin: SupabaseClient = createClient(supabaseUrl, supabaseS
   auth: { persistSession: false },
 })
 
-export const supabaseApiV1: SupabaseClient = createClient(supabaseUrl, supabaseServiceRole, {
+export const supabaseApiV1 = createClient(supabaseUrl, supabaseServiceRole, {
   auth: { persistSession: false },
   db: { schema: "api_v1" },
 })

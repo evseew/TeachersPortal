@@ -32,7 +32,7 @@ export async function POST() {
         NULL::text as prize
       FROM public.profiles p
       LEFT JOIN public.teacher_metrics tm ON tm.teacher_id = p.user_id
-      LEFT JOIN public.branch b ON b.id = tm.branch_id
+      LEFT JOIN public.branch b ON b.id = p.branch_id
       LEFT JOIN public.current_scores cs ON cs.teacher_id = p.user_id 
         AND cs.scope = 'teacher_overall' 
         AND cs.context = 'all'
