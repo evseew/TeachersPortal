@@ -11,7 +11,7 @@ const nextConfig = {
   },
   experimental: {
     // Use recommended settings for better performance
-    esmExternals: 'loose',
+    esmExternals: false,
     serverComponentsExternalPackages: ['supabase']
   },
   // Enable additional optimizations
