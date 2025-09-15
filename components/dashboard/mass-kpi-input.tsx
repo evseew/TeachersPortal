@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Check, Save, Edit3 } from "lucide-react"
-import { batchUpsertMetrics, type KpiUpsertRow } from "@/lib/api/metrics"
+import { batchUpsertMetrics } from "@/lib/clients/metrics.client"
+import type { KpiUpsertRow } from "@/lib/types/shared"
 import { useToast } from "@/hooks/use-toast"
 
 // Моки удалены. Данные грузим из /api/system/users + /api/metrics.

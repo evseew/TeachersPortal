@@ -7,9 +7,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { BranchService, type CreateBranchData, type UpdateBranchData } from '@/lib/services/branch.service'
+import { BranchService } from '@/lib/services/branch.service'
+import type { CreateBranchData, UpdateBranchData } from '@/lib/types/shared'
 import { useToast } from '@/hooks/use-toast'
-import type { Branch } from '@/lib/api/system'
+import type { Branch } from '@/lib/types/shared'
 
 export interface BranchOperationsState {
   branches: Branch[]

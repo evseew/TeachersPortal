@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Trophy, TrendingUp, TrendingDown, Sparkles, Search, Monitor, Coffee, Banknote } from "lucide-react"
 import { useEffect, useState } from "react"
-import { fetchBranchLeaderboard, type BranchLeaderboardRow } from "@/lib/api/leaderboard"
+import { fetchBranchLeaderboard } from "@/lib/clients/leaderboard.client"
+import type { BranchLeaderboardRow } from "@/lib/types/shared"
 // Мок-данные удалены. Источник — API /api/leaderboard.
 
 function getRankIcon(rank: number) {

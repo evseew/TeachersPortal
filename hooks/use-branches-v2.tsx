@@ -6,7 +6,7 @@
 "use client"
 
 import { useBranchOperations } from './use-branch-operations'
-import type { Branch } from '@/lib/api/system'
+import type { Branch } from '@/lib/types/shared'
 
 export interface UseBranchesReturn {
   branches: Branch[]

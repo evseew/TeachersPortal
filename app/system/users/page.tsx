@@ -12,8 +12,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { TopNav } from "@/components/top-nav"
-import { useBranches } from "@/hooks/use-branches"
+import { useBranchOperations } from "@/hooks/use-branch-operations"
 import { USER_ROLES, TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
+import { listUsers, updateUser as updateUserApi, deleteUser as deleteUserApi } from "@/lib/clients/users.client"
 
 type UiUser = {
   user_id: string
@@ -59,7 +60,7 @@ export default function UserManagementPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const { branches, loading: branchesLoading } = useBranches()
+  const { branches, loading: branchesLoading } = useBranchOperations()
 
   // Подсчет активных фильтров
   const activeFiltersCount = [
@@ -71,7 +72,6 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { listUsers } = await import("@/lib/api/users")
       try {
         const rows = await listUsers()
         const mappedUsers = rows.map((r) => ({
@@ -141,8 +141,6 @@ export default function UserManagementPage() {
     setError(null)
     
     try {
-      const { updateUser: apiUpdateUser } = await import("@/lib/api/users")
-      
       // Подготавливаем данные для обновления
       const updates: any = {
         role: user.role,
@@ -150,7 +148,7 @@ export default function UserManagementPage() {
         branch_id: user.branch_id,
       }
       
-      await apiUpdateUser(user.user_id, updates)
+      await updateUserApi(user.user_id, updates)
       
       // Обновляем локальное состояние
       const updatedUsers = users.map(u => u.user_id === user.user_id ? user : u)
@@ -175,9 +173,7 @@ export default function UserManagementPage() {
     setError(null)
     
     try {
-      const { deleteUser: apiDeleteUser } = await import("@/lib/api/users")
-      
-      await apiDeleteUser(user.user_id)
+      await deleteUserApi(user.user_id)
       
       // Обновляем локальное состояние
       const updatedUsers = users.filter(u => u.user_id !== user.user_id)
@@ -221,7 +217,6 @@ export default function UserManagementPage() {
       setSyncResult(result)
       
       // Обновляем список пользователей
-      const { listUsers } = await import("@/lib/api/users")
       const rows = await listUsers()
       const mappedUsers = rows.map((r) => ({
         user_id: r.user_id,

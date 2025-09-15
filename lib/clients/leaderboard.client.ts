@@ -3,7 +3,7 @@
  * Заменяет функции из lib/api/leaderboard.ts
  */
 
-import type { BranchLeaderboardRow, TeacherLeaderboardRow } from '@/lib/api/leaderboard'
+import type { BranchLeaderboardRow, TeacherLeaderboardRow } from '@/lib/types/shared'
 import type { SyncResult } from '@/lib/services/leaderboard-sync.service'
 
 export interface LeaderboardApiOptions {

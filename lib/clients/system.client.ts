@@ -3,7 +3,7 @@
  * Заменяет функции из lib/api/system.ts
  */
 
-import type { Branch, BranchUsageInfo } from '@/lib/api/system'
+import type { Branch, BranchUsageInfo } from '@/lib/types/shared'
 import type { SyncResult } from '@/lib/services/leaderboard-sync.service'
 import type { RecomputationResult } from '@/lib/services/score-recomputation.service'
 

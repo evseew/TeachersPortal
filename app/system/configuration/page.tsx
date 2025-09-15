@@ -10,9 +10,9 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { TopNav } from "@/components/top-nav"
-import { useBranchManagement } from "@/hooks/use-branch-management"
+import { useBranchOperations } from "@/hooks/use-branch-operations"
 import { BranchDeleteConfirmation } from "@/components/branch-delete-confirmation"
-import type { Branch } from "@/lib/api/system"
+import type { Branch } from "@/lib/types/shared"
 
 // Используем тип Branch из API вместо BranchRow
 
@@ -63,7 +63,7 @@ const PermissionCheckbox = ({ checked, onToggle }: { checked: boolean; onToggle:
 
 export default function SystemConfigurationPage() {
   // Branch management
-  const branchManagement = useBranchManagement()
+  const branchOperations = useBranchOperations()
   const [newBranch, setNewBranch] = useState({ name: "" })
   const [editBranch, setEditBranch] = useState({ name: "" })
   const [isAddBranchOpen, setIsAddBranchOpen] = useState(false)
@@ -83,7 +83,7 @@ export default function SystemConfigurationPage() {
 
   // Branch handlers
   const handleAddBranch = async () => {
-    const success = await branchManagement.createBranch(newBranch)
+    const success = await branchOperations.createBranch(newBranch)
     if (success) {
       setNewBranch({ name: "" })
       setIsAddBranchOpen(false)
@@ -91,19 +91,19 @@ export default function SystemConfigurationPage() {
   }
 
   const handleStartEditBranch = (branch: Branch) => {
-    branchManagement.startEditing(branch.id)
+    branchOperations.startEditing(branch.id)
     setEditBranch({ name: branch.name })
   }
 
   const handleSaveBranchEdit = async (branchId: string) => {
-    const success = await branchManagement.updateBranch(branchId, editBranch)
+    const success = await branchOperations.updateBranch(branchId, editBranch)
     if (success) {
       setEditBranch({ name: "" })
     }
   }
 
   const handleCancelBranchEdit = () => {
-    branchManagement.cancelEditing()
+    branchOperations.cancelEditing()
     setEditBranch({ name: "" })
   }
 
@@ -112,7 +112,7 @@ export default function SystemConfigurationPage() {
   }
 
   const handleConfirmDelete = async (branchId: string) => {
-    const success = await branchManagement.deleteBranch(branchId)
+    const success = await branchOperations.deleteBranch(branchId)
     if (success) {
       setDeleteConfirmation({ isOpen: false, branch: null })
     }
@@ -225,7 +225,7 @@ export default function SystemConfigurationPage() {
   console.log("[v0] Branch form state:", {
     name: newBranch.name,
     isValid: isBranchFormValid,
-    isAdding: branchManagement.isSubmitting,
+    isAdding: branchOperations.isSubmitting,
   })
 
   console.log("[v0] Role form state:", {
@@ -235,9 +235,9 @@ export default function SystemConfigurationPage() {
     isAdding: isAddingRole,
   })
 
-  // Load branches on mount
+  // Load branches on mount - уже автоматически загружается в useBranchOperations
   useEffect(() => {
-    branchManagement.loadBranches()
+    // branchOperations.refetch() - не нужно, так как автоматически загружается при монтировании
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -298,7 +298,7 @@ export default function SystemConfigurationPage() {
                             value={newBranch.name}
                             onChange={(e) => setNewBranch({ ...newBranch, name: e.target.value })}
                             onKeyDown={(e) => {
-                              if (e.key === "Enter" && isBranchFormValid && !branchManagement.isSubmitting) {
+                              if (e.key === "Enter" && isBranchFormValid && !branchOperations.isSubmitting) {
                                 e.preventDefault()
                                 void handleAddBranch()
                               }
@@ -314,8 +314,8 @@ export default function SystemConfigurationPage() {
                           >
                             Cancel
                           </Button>
-                          <Button onClick={handleAddBranch} disabled={branchManagement.isSubmitting || !isBranchFormValid} className="bg-[#7A9B28] hover:bg-[#5A7020]">
-                            {branchManagement.isSubmitting ? (
+                          <Button onClick={handleAddBranch} disabled={branchOperations.isSubmitting || !isBranchFormValid} className="bg-[#7A9B28] hover:bg-[#5A7020]">
+                            {branchOperations.isSubmitting ? (
                               <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                                 Добавление...
@@ -336,21 +336,21 @@ export default function SystemConfigurationPage() {
                       <div className="col-span-2">Actions</div>
                     </div>
 
-                    {branchManagement.loading ? (
+                    {branchOperations.loading ? (
                       <div className="py-8 text-center text-muted-foreground">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#7A9B28] mx-auto mb-2"></div>
                         Загрузка филиалов...
                       </div>
-                    ) : branchManagement.error ? (
+                    ) : branchOperations.error ? (
                       <div className="py-8 text-center text-destructive">
-                        Ошибка загрузки: {branchManagement.error}
+                        Ошибка загрузки: {branchOperations.error}
                       </div>
-                    ) : branchManagement.branches.length === 0 ? (
+                    ) : branchOperations.branches.length === 0 ? (
                       <div className="py-8 text-center text-muted-foreground">
                         Нет филиалов. Добавьте первый филиал.
                       </div>
                     ) : (
-                      branchManagement.branches.map((branch, index) => (
+                      branchOperations.branches.map((branch, index) => (
                         <div
                           key={branch.id}
                           className="grid grid-cols-10 gap-4 py-3 px-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200"
@@ -360,7 +360,7 @@ export default function SystemConfigurationPage() {
                         </div>
 
                         <div className="col-span-7 flex items-center">
-                          {branchManagement.editingBranchId === branch.id ? (
+                          {branchOperations.editingBranchId === branch.id ? (
                             <Input
                               value={editBranch.name}
                               onChange={(e) => setEditBranch({ ...editBranch, name: e.target.value })}
@@ -382,16 +382,16 @@ export default function SystemConfigurationPage() {
                         </div>
 
                         <div className="col-span-2 flex items-center space-x-2">
-                          {branchManagement.editingBranchId === branch.id ? (
+                          {branchOperations.editingBranchId === branch.id ? (
                             <>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleSaveBranchEdit(branch.id)}
-                                disabled={branchManagement.isSubmitting || !editBranch.name.trim()}
+                                disabled={branchOperations.isSubmitting || !editBranch.name.trim()}
                                 className="h-8 px-2 text-green-600 hover:text-green-700 border-green-200"
                               >
-                                {branchManagement.isSubmitting ? (
+                                {branchOperations.isSubmitting ? (
                                   <div className="animate-spin rounded-full h-3 w-3 border-b border-green-600"></div>
                                 ) : (
                                   <Check className="h-3 w-3" />
@@ -401,7 +401,7 @@ export default function SystemConfigurationPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={handleCancelBranchEdit}
-                                disabled={branchManagement.isSubmitting}
+                                disabled={branchOperations.isSubmitting}
                                 className="h-8 px-2 text-gray-600 hover:text-gray-700 bg-transparent"
                               >
                                 <X className="h-3 w-3" />
@@ -413,7 +413,7 @@ export default function SystemConfigurationPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleStartEditBranch(branch)}
-                                disabled={branchManagement.isSubmitting || branchManagement.editingBranchId !== null}
+                                disabled={branchOperations.isSubmitting || branchOperations.editingBranchId !== null}
                                 className="h-8 px-2"
                               >
                                 <Edit className="h-3 w-3" />
@@ -422,7 +422,7 @@ export default function SystemConfigurationPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDeleteBranch(branch)}
-                                disabled={branchManagement.isSubmitting}
+                                disabled={branchOperations.isSubmitting}
                                 className="h-8 px-2 text-red-600 hover:text-red-700 border-red-200"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -655,7 +655,7 @@ export default function SystemConfigurationPage() {
         isOpen={deleteConfirmation.isOpen}
         onClose={() => setDeleteConfirmation({ isOpen: false, branch: null })}
         onConfirm={handleConfirmDelete}
-        isDeleting={branchManagement.isSubmitting}
+        isDeleting={branchOperations.isSubmitting}
       />
     </div>
   )

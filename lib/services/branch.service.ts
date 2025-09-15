@@ -5,15 +5,7 @@
  */
 
 import { supabaseAdmin } from '@/lib/supabase/admin'
-import type { Branch, BranchUsageInfo } from '@/lib/api/system'
-
-export interface CreateBranchData {
-  name: string
-}
-
-export interface UpdateBranchData {
-  name: string
-}
+import type { Branch, BranchUsageInfo, CreateBranchData, UpdateBranchData } from '@/lib/types/shared'
 
 export interface BranchValidationResult {
   isValid: boolean

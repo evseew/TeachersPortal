@@ -1,21 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
-import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
+import { withAuth } from "@/lib/middleware/auth-middleware"
 import { ScoreRecomputationService } from "@/lib/services/score-recomputation.service"
 
-export async function POST(request: Request) {
-  // Проверяем авторизацию
-  const authError = await requireAuth()
-  if (authError) return authError
-  
-  // Только Admin и Senior Teacher могут вводить KPI
-  const hasPermission = await hasServerRole(["Administrator", "Senior Teacher"])
-  if (!hasPermission) {
-    return NextResponse.json(
-      { error: "Недостаточно прав для ввода KPI" }, 
-      { status: 403 }
-    )
-  }
+const batchUpsertHandler = async (request: NextRequest) => {
   try {
     const body = await request.json()
     const rows = Array.isArray(body) ? body : body?.rows
@@ -52,5 +40,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
   }
 }
+
+// Применяем middleware с авторизацией
+export const POST = withAuth({
+  requireAuth: true,
+  allowedRoles: ["Administrator", "Senior Teacher"]
+})(batchUpsertHandler)
 
 

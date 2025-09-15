@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { listBranches, type Branch } from "@/lib/api/system"
+import type { Branch } from "@/lib/types/shared"
+import { BranchService } from "@/lib/services/branch.service"
 
 export function useBranches() {
   const [branches, setBranches] = useState<Branch[]>([])
@@ -15,7 +16,8 @@ export function useBranches() {
       try {
         setLoading(true)
         setError(null)
-        const data = await listBranches()
+        const branchService = BranchService.getInstance()
+        const data = await branchService.listBranches()
         if (!ignore) {
           setBranches(data)
         }
@@ -49,7 +51,8 @@ export function useBranches() {
         try {
           setLoading(true)
           setError(null)
-          const data = await listBranches()
+          const branchService = BranchService.getInstance()
+        const data = await branchService.listBranches()
           if (!ignore) {
             setBranches(data)
           }

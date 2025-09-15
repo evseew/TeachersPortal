@@ -13,7 +13,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
-import type { Branch, BranchUsageInfo, checkBranchUsage } from "@/lib/api/system"
+import type { Branch, BranchUsageInfo } from "@/lib/types/shared"
+import { BranchService } from "@/lib/services/branch.service"
 
 interface BranchDeleteConfirmationProps {
   branch: Branch | null
@@ -38,12 +39,11 @@ export function BranchDeleteConfirmation({
   useEffect(() => {
     if (isOpen && branch) {
       setIsLoadingUsage(true)
-      import("@/lib/api/system").then(({ checkBranchUsage }) => {
-        checkBranchUsage(branch.id)
-          .then(setUsageInfo)
-          .catch(console.error)
-          .finally(() => setIsLoadingUsage(false))
-      })
+      const branchService = BranchService.getInstance()
+      branchService.checkBranchUsage(branch.id)
+        .then(setUsageInfo)
+        .catch(console.error)
+        .finally(() => setIsLoadingUsage(false))
     } else {
       setUsageInfo(null)
     }

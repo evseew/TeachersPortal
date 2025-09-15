@@ -9,7 +9,8 @@ import { ArrowUp, ArrowDown, Minus, GraduationCap, Search, ChevronLeft, ChevronR
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { fetchTeacherLeaderboard, type TeacherLeaderboardRow } from "@/lib/api/leaderboard"
+import { fetchTeacherLeaderboard } from "@/lib/clients/leaderboard.client"
+import type { TeacherLeaderboardRow } from "@/lib/types/shared"
 // Мок-данные удалены. Источник — API /api/leaderboard.
 
 function DeltaArrow({ delta }: { delta: number }) {

@@ -1,21 +1,9 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
 import { USER_ROLES, TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
-import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
+import { withAuth } from "@/lib/middleware/auth-middleware"
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  // Проверяем авторизацию
-  const authError = await requireAuth()
-  if (authError) return authError
-  
-  // Только администратор может редактировать пользователей
-  const hasPermission = await hasServerRole(["Administrator"])
-  if (!hasPermission) {
-    return NextResponse.json(
-      { error: "Недостаточно прав для редактирования пользователей" }, 
-      { status: 403 }
-    )
-  }
+const updateUserHandler = async (request: NextRequest, { params }: { params: { id: string } }) => {
   try {
     const body = await request.json()
     const id = params.id
@@ -89,7 +77,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+const deleteUserHandler = async (request: NextRequest, { params }: { params: { id: string } }) => {
   try {
     const id = params.id
     
@@ -141,5 +129,16 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
   }
 }
+
+// Применяем middleware с авторизацией
+export const PATCH = withAuth({
+  requireAuth: true,
+  allowedRoles: ["Administrator"]
+})(updateUserHandler)
+
+export const DELETE = withAuth({
+  requireAuth: true,
+  allowedRoles: ["Administrator"]
+})(deleteUserHandler)
 
 

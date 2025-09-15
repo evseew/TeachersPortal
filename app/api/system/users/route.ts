@@ -1,23 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
-import { requireAuth, hasServerRole } from "@/lib/auth/server-auth"
+import { withAuth } from "@/lib/middleware/auth-middleware"
 
 // Принудительно делаем route динамическим для обработки авторизации
 export const dynamic = 'force-dynamic'
 
-export async function GET(request: Request) {
-  // Проверяем авторизацию
-  const authError = await requireAuth()
-  if (authError) return authError
-  
-  // Проверяем роль (Admin или Head of Sales могут просматривать пользователей)
-  const hasPermission = await hasServerRole(["Administrator", "Head of Sales"])
-  if (!hasPermission) {
-    return NextResponse.json(
-      { error: "Недостаточно прав для просмотра пользователей" }, 
-      { status: 403 }
-    )
-  }
+const getUsersHandler = async (request: NextRequest) => {
   try {
     // Получаем параметры поиска
     const { searchParams } = new URL(request.url)
@@ -49,5 +37,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
   }
 }
+
+// Применяем middleware с авторизацией
+export const GET = withAuth({
+  requireAuth: true,
+  allowedRoles: ["Administrator", "Head of Sales"]
+})(getUsersHandler)
 
 

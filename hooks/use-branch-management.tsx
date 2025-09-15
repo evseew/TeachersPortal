@@ -1,7 +1,13 @@
 "use client"
 
+/**
+ * @deprecated Используйте useBranchOperations вместо этого хука
+ * Этот хук оставлен для backward compatibility
+ */
+
 import { useState, useCallback } from "react"
-import { listBranches, createBranch, updateBranch, deleteBranch, type Branch } from "@/lib/api/system"
+import type { Branch } from "@/lib/types/shared"
+import { BranchService } from "@/lib/services/branch.service"
 import { useToast } from "@/hooks/use-toast"
 
 export interface BranchManagementState {
@@ -31,7 +37,8 @@ export function useBranchManagement() {
   const loadBranches = useCallback(async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }))
-      const branches = await listBranches()
+      const branchService = BranchService.getInstance()
+      const branches = await branchService.listBranches()
       setState(prev => ({ ...prev, branches, loading: false }))
     } catch (error: any) {
       const errorMessage = error?.message ?? "Не удалось загрузить филиалы"
@@ -78,7 +85,10 @@ export function useBranchManagement() {
         branches: [...prev.branches, tempBranch]
       }))
 
-      const newBranch = await createBranch(name)
+      const branchService = BranchService.getInstance()
+      const result = await branchService.createBranch({ name })
+      if (!result.success) throw new Error(result.error)
+      const newBranch = result.data!
       
       // Заменяем временную запись на реальную
       setState(prev => ({ 
@@ -162,7 +172,10 @@ export function useBranchManagement() {
         )
       }))
 
-      const updatedBranch = await updateBranch(branchId, name)
+      const branchService = BranchService.getInstance()
+      const result = await branchService.updateBranch(branchId, { name })
+      if (!result.success) throw new Error(result.error)
+      const updatedBranch = result.data!
       
       setState(prev => ({ 
         ...prev, 
@@ -216,7 +229,9 @@ export function useBranchManagement() {
         branches: prev.branches.filter(b => b.id !== branchId)
       }))
 
-      await deleteBranch(branchId)
+      const branchService = BranchService.getInstance()
+      const result = await branchService.deleteBranch(branchId)
+      if (!result.success) throw new Error(result.error)
       
       setState(prev => ({ ...prev, isSubmitting: false }))
       
