@@ -77,8 +77,9 @@ export const config = {
      * - _next/static (статические файлы)
      * - _next/image (оптимизация изображений)
      * - favicon.ico
-     * - публичные файлы в /public
+     * - статические файлы (.png, .jpg, .svg и т.д.)
+     * - sw.js (service worker)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public/).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.webp|.*\\.pdf|.*\\.txt|.*\\.json).*)',
   ],
 }

@@ -40,29 +40,41 @@ export const authOptions: NextAuthOptions = {
       if (session?.user && token?.email) {
         session.user.email = token.email as string
         
-        // Получаем роль пользователя из БД
-        try {
-          const { data: profile } = await supabaseAdmin
-            .from('profiles')
-            .select('role')
-            .eq('email', token.email)
-            .single()
-          
-          if (profile) {
-            session.user.role = profile.role
+        // Для dev провайдера роль уже сохранена в токене
+        if (token.role) {
+          session.user.role = token.role as string
+        } else {
+          // Для OAuth провайдеров получаем роль из БД
+          try {
+            const { data: profile } = await supabaseAdmin
+              .from('profiles')
+              .select('role')
+              .eq('email', token.email)
+              .single()
+            
+            if (profile) {
+              session.user.role = profile.role
+            }
+          } catch (error) {
+            console.error("Ошибка получения роли:", error)
+            // Если не удалось получить роль, оставляем undefined
           }
-        } catch (error) {
-          console.error("Ошибка получения роли:", error)
-          // Если не удалось получить роль, оставляем undefined
         }
       }
       return session
     },
-    async jwt({ token, account, profile }) {
-      // Пока без доп. полей, сохраняем email
+    async jwt({ token, account, profile, user }) {
+      // Для credentials provider (dev-auto-login) данные приходят в user
+      if (user?.email) {
+        token.email = user.email
+        token.role = user.role
+      }
+      
+      // Для OAuth providers данные приходят в profile
       if (profile && (profile as any).email) {
         token.email = (profile as any).email
       }
+      
       return token
     },
   },
