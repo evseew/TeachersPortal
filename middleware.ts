@@ -7,6 +7,12 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const userRole = req.nextauth.token?.role as UserRole | undefined
+    const acceptHeader = req.headers.get('accept') || ''
+    
+    // Пропускаем не-HTML запросы (ассеты, sw.js, JSON и т.д.)
+    if (!acceptHeader.includes('text/html')) {
+      return NextResponse.next()
+    }
     
     // Проверяем, отключена ли авторизация
     const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
@@ -45,6 +51,12 @@ export default withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
+        const acceptHeader = req.headers.get('accept') || ''
+        
+        // Пропускаем не-HTML запросы (ассеты, sw.js, JSON и т.д.)
+        if (!acceptHeader.includes('text/html')) {
+          return true
+        }
         
         // Проверяем, отключена ли авторизация
         const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true"
