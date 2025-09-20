@@ -99,6 +99,20 @@ export function isReadOnlyAccess(userRole: UserRole | undefined, path: string): 
 }
 
 /**
+ * Возвращает список разрешенных корневых маршрутов (префиксов) для роли
+ */
+export function getAllowedRoutesForRole(role: UserRole): string[] {
+  const allowed: string[] = []
+  for (const [route, roles] of Object.entries(EFFECTIVE_ROUTE_PERMISSIONS)) {
+    if (roles.includes(role)) {
+      allowed.push(route)
+    }
+  }
+  // Стабильная сортировка для предсказуемости
+  return allowed.sort()
+}
+
+/**
  * Получает список доступных модулей для роли
  */
 export function getAccessibleModules(userRole: UserRole | undefined): string[] {

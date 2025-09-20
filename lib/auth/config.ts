@@ -2,6 +2,7 @@ import GoogleProvider from "next-auth/providers/google"
 import type { NextAuthOptions } from "next-auth"
 
 import { supabaseAdmin } from "@/lib/supabase/admin"
+import { getAllowedRoutesForRole } from "@/lib/auth/permissions"
 
 const allowedDomain = "planetenglish.ru"
 
@@ -75,6 +76,28 @@ export const authOptions: NextAuthOptions = {
         token.email = (profile as any).email
       }
       
+      // Обогащаем токен правами из панели (через роль → маршруты)
+      if (token.role) {
+        token.allowedRoutes = getAllowedRoutesForRole(token.role as any)
+        token.isAdmin = token.role === 'Administrator'
+        token.permissionsUpdatedAt = new Date().toISOString()
+      } else if (token.email) {
+        // fallback: подтянуть роль из БД, если ещё не установлена
+        try {
+          const { data: profileRow } = await supabaseAdmin
+            .from('profiles')
+            .select('role')
+            .eq('email', token.email)
+            .single()
+          if (profileRow?.role) {
+            token.role = profileRow.role
+            token.allowedRoutes = getAllowedRoutesForRole(profileRow.role as any)
+            token.isAdmin = profileRow.role === 'Administrator'
+            token.permissionsUpdatedAt = new Date().toISOString()
+          }
+        } catch {}
+      }
+
       return token
     },
   },

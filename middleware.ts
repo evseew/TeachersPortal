@@ -7,6 +7,8 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const userRole = req.nextauth.token?.role as UserRole | undefined
+    const isAdmin = (req.nextauth.token as any)?.isAdmin as boolean | undefined
+    const allowedRoutes = (req.nextauth.token as any)?.allowedRoutes as string[] | undefined
     const acceptHeader = req.headers.get('accept') || ''
     
     // Пропускаем не-HTML запросы (ассеты, sw.js, JSON и т.д.)
@@ -30,7 +32,29 @@ export default withAuth(
       return NextResponse.next()
     }
     
-    // Проверяем доступ к защищенным маршрутам
+    // Если админ — пропускаем всегда
+    if (isAdmin) {
+      return NextResponse.next()
+    }
+
+    // Если в токене есть явный список разрешенных префиксов — используем его
+    if (Array.isArray(allowedRoutes) && allowedRoutes.length > 0) {
+      const permitted = allowedRoutes.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'))
+      if (!permitted) {
+        console.log(`🚫 Доступ запрещен (JWT claims): ${userRole} -> ${pathname}`)
+        if (userRole) {
+          const searchParams = new URLSearchParams({ 
+            message: 'Недостаточно прав для доступа к этой странице',
+            role: userRole,
+            attempted: pathname 
+          })
+          return NextResponse.redirect(new URL(`/auth/access-denied?${searchParams}`, req.url))
+        }
+      }
+      return NextResponse.next()
+    }
+
+    // Fallback на статическую карту (на случай отсутствия клеймов)
     if (!hasAccess(userRole, pathname)) {
       console.log(`🚫 Доступ запрещен: ${userRole} пытается попасть на ${pathname}`)
       
