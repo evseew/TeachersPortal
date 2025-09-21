@@ -114,6 +114,7 @@ merge_branch() {
     
     # Делаем squash merge
     log_info "Делаем squash merge ветки '$branch_name'..."
+    log_warning "Squash merge объединяет все коммиты в один - история ветки будет сжата"
     git merge --squash "$branch_name"
     
     # Проверяем что есть изменения для коммита
@@ -124,15 +125,17 @@ merge_branch() {
     
     # Коммитим
     log_info "Создаем merge коммит..."
-    git commit -m "Merge branch '$branch_name'"
+    git commit -m "Merge branch '$branch_name' (squash)
+
+All commits from '$branch_name' have been squashed into this single commit."
     
     # Пушим main
     log_info "Отправляем изменения в main..."
     git push origin main
     
-    # Удаляем локальную ветку
+    # Удаляем локальную ветку (принудительно, т.к. squash merge не показывает связь коммитов)
     log_info "Удаляем локальную ветку '$branch_name'..."
-    git branch -d "$branch_name"
+    git branch -D "$branch_name"
     
     # Удаляем удаленную ветку
     log_info "Удаляем удаленную ветку '$branch_name'..."
