@@ -18,7 +18,8 @@ declare
 begin
   -- Проверяем, является ли email захардкоженным администратором
   -- Список должен синхронизироваться с ADMIN_EMAILS в lib/constants/user-management.ts
-  if p_email = 'info@planetenglish.ru' then
+  -- Для совместимости с существующими данными проверяем все админские email'ы
+  if p_email in ('info@planetenglish.ru', 'dev@planetenglish.ru') then
     v_is_admin := true;
   end if;
 
@@ -45,7 +46,7 @@ $$;
 
 comment on function public.ensure_profile(text, text, text) is 'Создаёт профиль при первом входе; обновляет avatar/full_name при повторном. Автоматически назначает роль Administrator захардкоженным email''ам.';
 
--- Обновляем существующий профиль info@planetenglish.ru до роли Administrator (если он уже существует)
-update public.profiles 
+-- Обновляем существующие профили администраторов до роли Administrator (если они уже существуют)
+update public.profiles
 set role = 'Administrator'::user_role, updated_at = now()
-where email = 'info@planetenglish.ru' and role != 'Administrator';
+where email in ('info@planetenglish.ru', 'dev@planetenglish.ru') and role != 'Administrator';

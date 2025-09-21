@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { PyrusUsersClient } from "@/lib/pyrus/client"
 import { supabaseAdmin } from "@/lib/supabase/admin"
-import { getOptimalAvatarUrl } from "@/lib/utils/avatar"
+// import { getOptimalAvatarUrl } from "@/lib/utils/avatar" // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ
 import { LeaderboardSyncService } from "@/lib/services/leaderboard-sync.service"
 import { withAuth } from "@/lib/middleware/auth-middleware"
 import { withErrorHandler } from "@/lib/middleware/api-error-handler"
@@ -66,11 +66,8 @@ async function syncUsersHandler(request: NextRequest) {
         const existingUser = currentUsers?.find(u => u.email.toLowerCase() === email)
         
         if (!existingUser) {
-          // Генерируем URL аватара
-          const avatarUrl = getOptimalAvatarUrl(email, fullName, { 
-            size: 64, 
-            defaultType: 'generated' 
-          })
+          // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - avatarUrl остается null
+          const avatarUrl = null
           
           // Добавляем нового пользователя с ролью "Regular User"
           const { error: insertError } = await supabaseAdmin

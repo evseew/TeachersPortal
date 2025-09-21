@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { TopNav } from "@/components/top-nav"
-import { useBranchOperations } from "@/hooks/use-branch-operations"
+// import { useBranchOperations } from "@/hooks/use-branch-operations" // Временно отключено
 import { BranchDeleteConfirmation } from "@/components/branch-delete-confirmation"
 import type { Branch } from "@/lib/types/shared"
 
@@ -62,8 +62,35 @@ const PermissionCheckbox = ({ checked, onToggle }: { checked: boolean; onToggle:
 }
 
 export default function SystemConfigurationPage() {
-  // Branch management
-  const branchOperations = useBranchOperations()
+  // Branch management - временная заглушка
+  const [branches, setBranches] = useState<Branch[]>([])
+  const [branchesLoading, setBranchesLoading] = useState(false)
+  const [branchError, setBranchError] = useState<string | null>(null)
+  const [editingBranchId, setEditingBranchId] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  // Создаем объект branchOperations для совместимости
+  const branchOperations = {
+    branches,
+    loading: branchesLoading,
+    error: branchError,
+    isSubmitting,
+    editingBranchId,
+    createBranch: async (data: { name: string }) => {
+      console.warn("Branch operations temporarily disabled")
+      return false
+    },
+    updateBranch: async (id: string, data: { name: string }) => {
+      console.warn("Branch operations temporarily disabled")
+      return false
+    },
+    deleteBranch: async (id: string) => {
+      console.warn("Branch operations temporarily disabled")
+      return false
+    },
+    startEditing: (id: string) => setEditingBranchId(id),
+    cancelEditing: () => setEditingBranchId(null),
+  }
   const [newBranch, setNewBranch] = useState({ name: "" })
   const [editBranch, setEditBranch] = useState({ name: "" })
   const [isAddBranchOpen, setIsAddBranchOpen] = useState(false)
@@ -235,10 +262,28 @@ export default function SystemConfigurationPage() {
     isAdding: isAddingRole,
   })
 
-  // Load branches on mount - уже автоматически загружается в useBranchOperations
+  // Load branches on mount
   useEffect(() => {
-    // branchOperations.refetch() - не нужно, так как автоматически загружается при монтировании
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const loadBranches = async () => {
+      try {
+        setBranchesLoading(true)
+        setBranchError(null)
+        const response = await fetch('/api/system/branches')
+        if (response.ok) {
+          const data = await response.json()
+          setBranches(data)
+        } else {
+          setBranchError('Failed to load branches')
+        }
+      } catch (error) {
+        setBranchError('Network error')
+        console.warn("Branches API unavailable; staying with empty list")
+      } finally {
+        setBranchesLoading(false)
+      }
+    }
+    
+    loadBranches()
   }, [])
 
   return (

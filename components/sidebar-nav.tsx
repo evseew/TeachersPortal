@@ -56,7 +56,7 @@ function SidebarNav() {
   const [expandedModules, setExpandedModules] = useState<string[]>(["September Rating"])
   const pathname = usePathname()
   const router = useRouter()
-  const { hasAccess } = useUserRole()
+  const { hasAccess, userRole, isLoading } = useUserRole()
 
   useEffect(() => {
     // Check if current path matches any subpage and auto-expand parent module
@@ -130,8 +130,19 @@ function SidebarNav() {
           const moduleActive = isActive(module.href)
           
           // Проверяем доступ к модулю
-          if (module.requiresPath && !hasAccess(module.requiresPath)) {
+          // В dev режиме для Administrator пропускаем проверку доступа к system
+          const isDevSystemModule = process.env.NODE_ENV === 'development' &&
+                                   userRole === 'Administrator' &&
+                                   module.name === 'System'
+
+          // Проверяем доступ только если роль определена и сессия загружена
+          if (module.requiresPath && !isLoading && userRole && !isDevSystemModule && !hasAccess(module.requiresPath)) {
             return null
+          }
+
+          // Если роль не определена, показываем модуль (роль будет получена позже)
+          if (module.requiresPath && !isLoading && !userRole) {
+            console.log(`⚠️ [SidebarNav] Роль не определена, показываем модуль ${module.name} (роль будет получена из БД)`)
           }
 
           return (
@@ -182,7 +193,12 @@ function SidebarNav() {
                     const subpageActive = isActive(subpage.href)
                     
                     // Проверяем доступ к подстранице
-                    if ((subpage as any).requiresPath && !hasAccess((subpage as any).requiresPath)) {
+                    // В dev режиме для Administrator пропускаем проверку доступа к system подстраницам
+                    const isDevSystemSubpage = process.env.NODE_ENV === 'development' &&
+                                              userRole === 'Administrator' &&
+                                              subpage.href.startsWith('/system')
+
+                    if ((subpage as any).requiresPath && !isDevSystemSubpage && !hasAccess((subpage as any).requiresPath)) {
                       return null
                     }
 

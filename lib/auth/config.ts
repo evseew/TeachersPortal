@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
 import { supabaseAdmin } from "@/lib/supabase/admin"
+import { type UserRole } from "@/lib/constants/user-management"
 
 const allowedDomain = "planetenglish.ru"
 
@@ -64,25 +65,38 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session?.user && token?.email) {
         session.user.email = token.email as string
-        
-        // Для dev провайдера роль уже сохранена в токене
-        if (token.role) {
-          session.user.role = token.role as string
+
+        // Для dev пользователя в development режиме всегда Administrator
+        if (process.env.NODE_ENV === 'development' && token.email === 'dev@planetenglish.ru') {
+          session.user.role = 'Administrator'
+          console.log(`🔍 Dev пользователь ${token.email} получает роль: Administrator`)
         } else {
-          // Для OAuth провайдеров получаем роль из БД
-          try {
-            const { data: profile } = await supabaseAdmin
-              .from('profiles')
-              .select('role')
-              .eq('email', token.email)
-              .single()
-            
-            if (profile) {
-              session.user.role = profile.role
+          // Для остальных провайдеров используем роль из токена или БД
+          if (token.role && typeof token.role === 'string') {
+            session.user.role = token.role as UserRole
+          } else {
+            // Для OAuth провайдеров получаем роль из БД
+            try {
+              const { data: profile } = await supabaseAdmin
+                .from('profiles')
+                .select('role')
+                .eq('email', token.email)
+                .single()
+
+              if (profile) {
+                session.user.role = profile.role
+                console.log(`🔍 Пользователь ${token.email} получил роль из БД: ${profile.role}`)
+              } else {
+                // Если профиль не найден, устанавливаем Regular User
+                session.user.role = 'Regular User'
+                console.log(`⚠️ Профиль не найден для ${token.email}, устанавливаем Regular User`)
+              }
+            } catch (error) {
+              console.error("Ошибка получения роли:", error)
+              // Если не удалось получить роль, устанавливаем Regular User по умолчанию
+              session.user.role = 'Regular User'
+              console.log(`⚠️ Ошибка получения роли для ${token.email}, устанавливаем Regular User`)
             }
-          } catch (error) {
-            console.error("Ошибка получения роли:", error)
-            // Если не удалось получить роль, оставляем undefined
           }
         }
       }
@@ -92,14 +106,16 @@ export const authOptions: NextAuthOptions = {
       // Для credentials provider (dev-auto-login) данные приходят в user
       if (user?.email) {
         token.email = user.email
+        // Устанавливаем роль в токен для всех пользователей
+        // Для dev пользователя роль будет Administrator из credentials provider
         token.role = user.role
       }
-      
+
       // Для OAuth providers данные приходят в profile
       if (profile && (profile as any).email) {
         token.email = (profile as any).email
       }
-      
+
       return token
     },
   },

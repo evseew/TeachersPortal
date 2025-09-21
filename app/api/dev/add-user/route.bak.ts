@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabaseAdmin } from "@/lib/supabase/admin"
+
+// Временный тестовый API для проверки
+export async function GET(request: NextRequest) {
+  return NextResponse.json({
+    message: "API работает!",
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV
+  })
+}
 
 export async function POST(request: NextRequest) {
   // Разрешаем только в режиме разработки
@@ -26,9 +34,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (existing) {
-      return NextResponse.json({
+      return NextResponse.json({ 
         message: 'Dev пользователь уже существует',
-        user: devUser
+        user: devUser 
       })
     }
 
@@ -42,15 +50,15 @@ export async function POST(request: NextRequest) {
       throw error
     }
 
-    return NextResponse.json({
+    return NextResponse.json({ 
       message: 'Dev пользователь успешно добавлен',
-      user: devUser
+      user: devUser 
     })
 
   } catch (error: any) {
     console.error('Ошибка при добавлении dev пользователя:', error)
-    return NextResponse.json({
-      error: error.message || 'Ошибка при добавлении dev пользователя'
+    return NextResponse.json({ 
+      error: error.message || 'Ошибка при добавлении dev пользователя' 
     }, { status: 500 })
   }
 }

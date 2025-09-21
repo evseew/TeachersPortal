@@ -25,7 +25,7 @@ export default function DevLoginPage() {
       const addUserResponse = await fetch('/api/dev/add-user', {
         method: 'POST',
       })
-      
+
       if (!addUserResponse.ok) {
         throw new Error('Не удалось создать dev пользователя')
       }
@@ -37,7 +37,7 @@ export default function DevLoginPage() {
       const result = await signIn('dev-auto-login', {
         redirect: false,
       })
-      
+
       if (result?.ok) {
         // Успешный логин, перенаправляем на dashboard
         router.push('/dashboard')

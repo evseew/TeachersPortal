@@ -1,17 +1,15 @@
 /**
- * Умный компонент аватара с поддержкой fallback
- * 
- * Автоматически подбирает лучший источник аватара:
- * 1. Gravatar (если есть)
- * 2. Генерируемый аватар
- * 3. Инициалы как fallback
+ * Компонент аватара с локальными инициалами
+ *
+ * Использует только локальные инициалы пользователя.
+ * Внешние сервисы аватаров (Gravatar, UI Avatars) отключены.
  */
 
 "use client"
 
-import React, { useState } from "react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { getOptimalAvatarUrl, getInitials } from "@/lib/utils/avatar"
+import React from "react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { getInitials } from "@/lib/utils/avatar"
 
 interface SmartAvatarProps {
   email: string
@@ -29,58 +27,23 @@ const sizeMap = {
   xl: { container: 'h-12 w-12', text: 'text-lg' }
 }
 
-export function SmartAvatar({ 
-  email, 
-  name, 
-  size = 'md', 
+export function SmartAvatar({
+  email,
+  name,
+  size = 'md',
   className = '',
   showTooltip = false,
   avatarUrl = null
 }: SmartAvatarProps) {
-  const [imageError, setImageError] = useState(false)
-  const [primaryImageError, setPrimaryImageError] = useState(false)
-  
   const sizeConfig = sizeMap[size]
-  const pixelSize = size === 'sm' ? 24 : size === 'md' ? 32 : size === 'lg' ? 40 : 48
-  
   const initials = getInitials(name)
-  
-  // Определяем, какой источник использовать
-  let primaryImageUrl: string | null = null
-  
-  if (avatarUrl && !primaryImageError) {
-    // Используем переданный avatar_url
-    primaryImageUrl = avatarUrl
-  } else if (!primaryImageError) {
-    // Fallback на Gravatar
-    primaryImageUrl = getOptimalAvatarUrl(email, name, { 
-      size: pixelSize, 
-      defaultType: 'gravatar' 
-    })
-  } else if (!imageError) {
-    // Fallback на генерируемый аватар
-    primaryImageUrl = getOptimalAvatarUrl(email, name, { 
-      size: pixelSize, 
-      defaultType: 'generated' 
-    })
-  }
-  
+
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - используем только локальные инициалы
+
   const avatarComponent = (
     <Avatar className={`${sizeConfig.container} ${className}`}>
-      {primaryImageUrl && (
-        <AvatarImage 
-          src={primaryImageUrl} 
-          alt={`${name} avatar`}
-          onError={() => {
-            if (!primaryImageError) {
-              setPrimaryImageError(true)
-            } else {
-              setImageError(true)
-            }
-          }}
-        />
-      )}
-      <AvatarFallback 
+      {/* Внешние аватары отключены - показываем только инициалы */}
+      <AvatarFallback
         className={`${sizeConfig.text} font-semibold bg-gradient-to-br from-blue-500 to-purple-600 text-white`}
       >
         {initials}
@@ -114,39 +77,15 @@ interface AvatarPreviewProps {
 }
 
 export function AvatarPreview({ email, name, showSource = false, className = '' }: AvatarPreviewProps) {
-  const [gravatarExists, setGravatarExists] = useState<boolean | null>(null)
-  
-  // Проверяем наличие Gravatar при монтировании
-  React.useEffect(() => {
-    const checkGravatar = async () => {
-      try {
-        const gravatarUrl = getOptimalAvatarUrl(email, name, { 
-          size: 64, 
-          defaultType: 'gravatar' 
-        })
-        const response = await fetch(gravatarUrl, { method: 'HEAD' })
-        setGravatarExists(response.ok)
-      } catch {
-        setGravatarExists(false)
-      }
-    }
-    
-    checkGravatar()
-  }, [email, name])
-  
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       <SmartAvatar email={email} name={name} size="lg" />
       <div className="flex-1">
         <div className="font-medium">{name}</div>
         <div className="text-sm text-gray-500">{email}</div>
-        {showSource && gravatarExists !== null && (
+        {showSource && (
           <div className="text-xs text-gray-400 mt-1">
-            {gravatarExists ? (
-              <span className="text-green-600">✓ Gravatar найден</span>
-            ) : (
-              <span className="text-blue-600">🎨 Генерируемый аватар</span>
-            )}
+            <span className="text-blue-600">🎨 Локальные инициалы</span>
           </div>
         )}
       </div>

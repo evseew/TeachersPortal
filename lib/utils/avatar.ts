@@ -39,27 +39,20 @@ export interface AvatarOptions {
 
 /**
  * Получает URL аватара для email через Gravatar
+ * ВАЖНО: Внешние аватары отключены, возвращаем пустую строку для fallback на локальные
  */
 export function getGravatarUrl(email: string, options: AvatarOptions = {}): string {
-  const { size = 40, fallback = 'mp' } = options
-  
-  // Создаем хеш от email (требование Gravatar)
-  const emailHash = createEmailHash(email)
-  
-  return `https://www.gravatar.com/avatar/${emailHash}?s=${size}&d=${fallback}`
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - возвращаем пустую строку
+  return ''
 }
 
 /**
  * Получает URL генерируемого аватара по имени
+ * ВАЖНО: Внешние аватары отключены, возвращаем пустую строку для fallback на локальные
  */
 export function getGeneratedAvatarUrl(name: string, options: AvatarOptions = {}): string {
-  const { size = 40 } = options
-  
-  // Очищаем имя для URL
-  const cleanName = encodeURIComponent(name.trim())
-  
-  // Используем UI Avatars для генерации красивых аватаров
-  return `https://ui-avatars.com/api/?name=${cleanName}&size=${size}&background=random&color=fff&font-size=0.4&rounded=true`
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - возвращаем пустую строку
+  return ''
 }
 
 /**
@@ -79,43 +72,26 @@ export function getInitials(name: string): string {
 
 /**
  * Получает оптимальный URL аватара с fallback логикой
+ * ВАЖНО: Внешние аватары отключены, всегда возвращаем пустую строку для локальных инициалов
  */
 export function getOptimalAvatarUrl(email: string, name: string, options: AvatarOptions = {}): string {
-  const { defaultType = 'gravatar', size = 40 } = options
-  
-  switch (defaultType) {
-    case 'gravatar':
-      // Сначала пробуем Gravatar, fallback на генерируемый
-      return getGravatarUrl(email, { 
-        ...options, 
-        fallback: getGeneratedAvatarUrl(name, options)
-      })
-      
-    case 'generated':
-      return getGeneratedAvatarUrl(name, options)
-      
-    case 'initials':
-    default:
-      // Возвращаем null для использования компонента с инициалами
-      return ''
-  }
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - всегда возвращаем пустую строку
+  // Компоненты должны использовать только локальные инициалы
+  return ''
 }
 
 /**
  * Проверяет, существует ли аватар в Gravatar
+ * ВАЖНО: Внешние аватары отключены, всегда возвращаем false
  */
 export async function checkGravatarExists(email: string): Promise<boolean> {
-  try {
-    const url = getGravatarUrl(email, { fallback: '404' })
-    const response = await fetch(url, { method: 'HEAD' })
-    return response.ok
-  } catch {
-    return false
-  }
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - всегда возвращаем false
+  return false
 }
 
 /**
  * Получает информацию об аватаре пользователя
+ * ВАЖНО: Внешние аватары отключены, всегда возвращаем локальные инициалы
  */
 export interface AvatarInfo {
   url: string | null
@@ -126,30 +102,8 @@ export interface AvatarInfo {
 
 export async function getAvatarInfo(email: string, name: string, options: AvatarOptions = {}): Promise<AvatarInfo> {
   const initials = getInitials(name)
-  
-  // Проверяем наличие Gravatar
-  const hasGravatar = await checkGravatarExists(email)
-  
-  if (hasGravatar) {
-    return {
-      url: getGravatarUrl(email, options),
-      initials,
-      hasGravatar: true,
-      source: 'gravatar'
-    }
-  }
-  
-  // Используем генерируемый аватар если нет Gravatar
-  if (options.defaultType === 'generated') {
-    return {
-      url: getGeneratedAvatarUrl(name, options),
-      initials,
-      hasGravatar: false,
-      source: 'generated'
-    }
-  }
-  
-  // Fallback на инициалы
+
+  // ВНЕШНИЕ АВАТАРЫ ОТКЛЮЧЕНЫ - всегда возвращаем локальные инициалы
   return {
     url: null,
     initials,

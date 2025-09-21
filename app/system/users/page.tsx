@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { SidebarNav } from "@/components/sidebar-nav"
 import { TopNav } from "@/components/top-nav"
-import { useBranchOperations } from "@/hooks/use-branch-operations"
+// import { useBranchOperations } from "@/hooks/use-branch-operations" // Временно отключено из-за проблем с Supabase на клиенте
 import { USER_ROLES, TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
 import { listUsers, updateUser as updateUserApi, deleteUser as deleteUserApi } from "@/lib/clients/users.client"
 
@@ -60,7 +60,9 @@ export default function UserManagementPage() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   
-  const { branches, loading: branchesLoading } = useBranchOperations()
+  // Временная заглушка для филиалов
+  const [branches, setBranches] = useState<Array<{id: string, name: string}>>([])
+  const [branchesLoading, setBranchesLoading] = useState(false)
 
   // Подсчет активных фильтров
   const activeFiltersCount = [
@@ -90,7 +92,24 @@ export default function UserManagementPage() {
         console.warn("Users API unavailable; staying with empty list")
       }
     }
+    
+    const loadBranches = async () => {
+      try {
+        setBranchesLoading(true)
+        const response = await fetch('/api/system/branches')
+        if (response.ok) {
+          const data = await response.json()
+          setBranches(data)
+        }
+      } catch (e) {
+        console.warn("Branches API unavailable; staying with empty list")
+      } finally {
+        setBranchesLoading(false)
+      }
+    }
+    
     void load()
+    void loadBranches()
   }, [])
 
   // Фильтрация пользователей по всем критериям

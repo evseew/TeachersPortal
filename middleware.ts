@@ -12,25 +12,33 @@ export default withAuth(
     if (
       pathname.startsWith('/auth/') ||
       pathname.startsWith('/api/auth/') ||
-      pathname.startsWith('/dev-login') ||
+      pathname.startsWith('/devlogin') ||
       pathname === '/'
     ) {
       return NextResponse.next()
     }
     
-    // Проверяем доступ к защищенным маршрутам
-    if (!hasAccess(userRole, pathname)) {
+    // В dev режиме для dev пользователя пропускаем проверку доступа к system путям
+    const isDevSystemPath = process.env.NODE_ENV === 'development' &&
+                           pathname.startsWith('/system') &&
+                           req.nextauth.token?.email === 'dev@planetenglish.ru'
+
+    // Проверяем доступ только если роль определена
+    if (userRole && !isDevSystemPath && !hasAccess(userRole, pathname)) {
       console.log(`🚫 Доступ запрещен: ${userRole} пытается попасть на ${pathname}`)
-      
+
       // Если роль есть, но доступа нет - показываем 403 через redirect на специальную страницу
-      if (userRole) {
-        const searchParams = new URLSearchParams({ 
-          message: 'Недостаточно прав для доступа к этой странице',
-          role: userRole,
-          attempted: pathname 
-        })
-        return NextResponse.redirect(new URL(`/auth/access-denied?${searchParams}`, req.url))
-      }
+      const searchParams = new URLSearchParams({
+        message: 'Недостаточно прав для доступа к этой странице',
+        role: userRole,
+        attempted: pathname
+      })
+      return NextResponse.redirect(new URL(`/auth/access-denied?${searchParams}`, req.url))
+    }
+
+    // Если роль не определена, логируем и пропускаем (роль будет получена позже)
+    if (!userRole && !pathname.startsWith('/auth/') && !pathname.startsWith('/api/auth/')) {
+      console.log(`⚠️ [Middleware] Роль не определена для ${pathname}, пропускаем (роль будет получена из БД)`)
     }
     
     return NextResponse.next()
@@ -44,7 +52,7 @@ export default withAuth(
         if (
           pathname.startsWith('/auth/') ||
           pathname.startsWith('/api/auth/') ||
-          pathname.startsWith('/dev-login') ||
+          pathname.startsWith('/devlogin') ||
           pathname === '/'
         ) {
           return true

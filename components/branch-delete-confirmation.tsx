@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import type { Branch, BranchUsageInfo } from "@/lib/types/shared"
-import { BranchService } from "@/lib/services/branch.service"
 
 interface BranchDeleteConfirmationProps {
   branch: Branch | null
@@ -39,10 +38,16 @@ export function BranchDeleteConfirmation({
   useEffect(() => {
     if (isOpen && branch) {
       setIsLoadingUsage(true)
-      const branchService = BranchService.getInstance()
-      branchService.checkBranchUsage(branch.id)
-        .then(setUsageInfo)
-        .catch(console.error)
+      // Вариант A: используем API-роут, чтобы не тянуть server-only код в клиент
+      fetch(`/api/system/branches/${branch.id}/check-usage`)
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed to load usage (${res.status})`))))
+        .then((data: BranchUsageInfo) => {
+          setUsageInfo(data)
+        })
+        .catch((err) => {
+          console.error("Failed to load branch usage:", err)
+          setUsageInfo(null)
+        })
         .finally(() => setIsLoadingUsage(false))
     } else {
       setUsageInfo(null)

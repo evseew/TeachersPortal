@@ -34,22 +34,26 @@ export const READ_ONLY_ROUTES: Record<string, UserRole[]> = {
  * Проверяет, имеет ли пользователь доступ к маршруту
  */
 export function hasAccess(userRole: UserRole | undefined, path: string): boolean {
-  if (!userRole) return false
-  
   // Проверяем точное совпадение пути
   if (ROUTE_PERMISSIONS[path]) {
-    return ROUTE_PERMISSIONS[path].includes(userRole)
+    return userRole ? ROUTE_PERMISSIONS[path].includes(userRole) : false
   }
-  
+
   // Проверяем родительские пути (например, /system/users -> /system)
   const pathSegments = path.split('/').filter(Boolean)
   for (let i = pathSegments.length - 1; i >= 0; i--) {
     const parentPath = '/' + pathSegments.slice(0, i + 1).join('/')
     if (ROUTE_PERMISSIONS[parentPath]) {
-      return ROUTE_PERMISSIONS[parentPath].includes(userRole)
+      return userRole ? ROUTE_PERMISSIONS[parentPath].includes(userRole) : false
     }
   }
-  
+
+  // Если путь не найден в permissions, проверяем публичные пути
+  if (path === '/' || path.startsWith('/auth/') || path.startsWith('/api/auth/')) {
+    return true
+  }
+
+  // Для всех остальных путей требуем авторизацию
   return false
 }
 
@@ -87,3 +91,4 @@ export function getAccessibleModules(userRole: UserRole | undefined): string[] {
   
   return modules
 }
+
