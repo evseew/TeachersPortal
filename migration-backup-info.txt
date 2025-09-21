@@ -1,0 +1,4 @@
+drwxr-xr-x@ 231 test  staff    7392 Sep 17 11:10 node_modules
+drwxr-xr-x@   8 test  staff     256 Sep 16 19:34 node_modules.bak.1757675827
+-rw-------@   1 test  staff  493676 Sep 17 09:56 package-lock.json
+-rw-------@   1 test  staff  191414 Sep 17 09:54 pnpm-lock.yaml
