@@ -11,19 +11,40 @@ const updateUserHandler = async (request: NextRequest, { params }: { params: { i
     
     // Получаем текущие данные пользователя для проверки роли
     const { data: currentUser, error: fetchError } = await supabaseAdmin
-      .from("profiles")
-      .select("role")
+      .from("profiles_with_role")
+      .select("role, role_id")
       .eq("user_id", id)
       .single()
     
     if (fetchError) throw fetchError
     
-    // Валидация роли
-    if (body.role) {
-      if (!USER_ROLES.includes(body.role)) {
-        return NextResponse.json({ error: "Invalid role" }, { status: 400 })
+    // Валидация роли - теперь принимаем как role (название), так и role_id
+    if (body.role_id) {
+      // Если передан role_id, проверяем что роль существует
+      const { data: roleExists, error: roleError } = await supabaseAdmin
+        .from("roles")
+        .select("id, name")
+        .eq("id", body.role_id)
+        .single()
+      
+      if (roleError || !roleExists) {
+        return NextResponse.json({ error: "Invalid role_id" }, { status: 400 })
       }
-      updates.role = body.role
+      
+      updates.role_id = body.role_id
+    } else if (body.role) {
+      // Если передано название роли, находим соответствующий role_id
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from("roles")
+        .select("id, name")
+        .eq("name", body.role)
+        .single()
+      
+      if (roleError || !roleData) {
+        return NextResponse.json({ error: "Invalid role name" }, { status: 400 })
+      }
+      
+      updates.role_id = roleData.id
     }
     
     // Валидация категории
@@ -36,14 +57,24 @@ const updateUserHandler = async (request: NextRequest, { params }: { params: { i
       updates.category = body.category || null
     }
     
-    // Валидация: category обязательна для Teacher/Senior Teacher
-    if (updates.role) {
-      if (isTeacherRole(updates.role) && !updates.category) {
-        return NextResponse.json({ error: "Category is required for Teacher and Senior Teacher roles" }, { status: 400 })
-      }
-      // Если роль меняется на не-учителя, очищаем category
-      if (!isTeacherRole(updates.role)) {
-        updates.category = null
+    // Валидация: category обязательна только для Teacher (Senior Teacher это менеджер)
+    if (updates.role_id) {
+      // Получаем название роли для проверки
+      const { data: newRole } = await supabaseAdmin
+        .from("roles")
+        .select("name")
+        .eq("id", updates.role_id)
+        .single()
+      
+      if (newRole) {
+        const roleName = newRole.name
+        if (isTeacherRole(roleName) && !body.category) {
+          return NextResponse.json({ error: "Category is required for Teacher role" }, { status: 400 })
+        }
+        // Если роль меняется на не-учителя, очищаем category
+        if (!isTeacherRole(roleName)) {
+          updates.category = null
+        }
       }
     }
     
@@ -57,16 +88,28 @@ const updateUserHandler = async (request: NextRequest, { params }: { params: { i
     if (error) throw error
     
     // Если изменился branch_id для учителя, обновляем teacher_metrics
-    const finalRole = updates.role || currentUser.role
-    if (updates.branch_id !== undefined && isTeacherRole(finalRole)) {
-      const { error: metricsError } = await supabaseAdmin
-        .from("teacher_metrics")
-        .update({ branch_id: updates.branch_id })
-        .eq("teacher_id", id)
+    if (updates.branch_id !== undefined) {
+      // Определяем финальную роль после обновления
+      let finalRoleName = currentUser.role
+      if (updates.role_id) {
+        const { data: newRole } = await supabaseAdmin
+          .from("roles")
+          .select("name")
+          .eq("id", updates.role_id)
+          .single()
+        if (newRole) finalRoleName = newRole.name
+      }
       
-      if (metricsError) {
-        console.warn("Failed to update teacher_metrics branch_id:", metricsError)
-        // Не блокируем основную операцию, но логируем предупреждение
+      if (isTeacherRole(finalRoleName)) {
+        const { error: metricsError } = await supabaseAdmin
+          .from("teacher_metrics")
+          .update({ branch_id: updates.branch_id })
+          .eq("teacher_id", id)
+        
+        if (metricsError) {
+          console.warn("Failed to update teacher_metrics branch_id:", metricsError)
+          // Не блокируем основную операцию, но логируем предупреждение
+        }
       }
     }
     

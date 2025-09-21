@@ -8,5 +8,9 @@ export type UserRole = typeof USER_ROLES[number]
 export type TeacherCategory = typeof TEACHER_CATEGORIES[number]
 
 export function isTeacherRole(role: string): boolean {
-  return role === "Teacher" || role === "Senior Teacher"
+  return role === "Teacher"  // Senior Teacher это менеджер, не преподаватель
+}
+
+export function isManagerRole(role: string): boolean {
+  return role === "Senior Teacher" || role === "Head of Sales" || role === "Administrator"
 }

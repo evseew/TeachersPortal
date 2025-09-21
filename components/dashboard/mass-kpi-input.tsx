@@ -32,7 +32,7 @@ export function MassKpiInput() {
         const usersRes = await fetch("/api/system/users", { cache: "no-store" })
         if (!usersRes.ok) throw new Error("Failed to load users")
         const users = (await usersRes.json()) as Array<any>
-        const teachers = users.filter((u) => (u.role ?? "").toLowerCase().includes("teacher"))
+        const teachers = users.filter((u) => u.role === "Teacher")
 
         // 2) Метрики
         const metricsRes = await fetch("/api/metrics", { cache: "no-store" })

@@ -150,9 +150,9 @@ export default function UserManagementPage() {
       return
     }
     
-    // Валидация категории для учителей
+    // Валидация категории только для Teacher (Senior Teacher это менеджер)
     if (isTeacherRole(user.role) && !user.category) {
-      setError("Категория обязательна для учителей")
+      setError("Категория обязательна для роли Teacher")
       return
     }
     

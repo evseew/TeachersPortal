@@ -31,7 +31,7 @@ export function useUserRole() {
     isRegularUser: userRole === "Regular User",
     
     // Проверки групп ролей
-    isTeacherRole: userRole === "Teacher" || userRole === "Senior Teacher",
+    isTeacherRole: userRole === "Teacher",  // Senior Teacher это менеджер, не преподаватель
     canInputKPI: userRole === "Administrator" || userRole === "Senior Teacher",
     canViewSystem: userRole === "Administrator" || userRole === "Head of Sales",
     canManageUsers: userRole === "Administrator",

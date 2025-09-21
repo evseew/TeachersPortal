@@ -10,10 +10,12 @@ export interface UserRow {
   email: string
   full_name: string
   role: UserRole
+  role_id: string
   category: TeacherCategory | null
   branch_id: string | null
   branch_name: string | null
   avatar_url: string | null
+  permissions?: string[]
 }
 
 export interface UsersApiOptions {
@@ -62,7 +64,7 @@ export class UsersApiClient {
    */
   async updateUser(
     id: string, 
-    updates: Partial<Pick<UserRow, "role" | "category" | "branch_id">>,
+    updates: Partial<Pick<UserRow, "role" | "role_id" | "category" | "branch_id">>,
     options: UsersApiOptions = {}
   ): Promise<void> {
     try {
@@ -188,7 +190,7 @@ export async function listUsers(query?: string): Promise<UserRow[]> {
   return usersApi.listUsers(query)
 }
 
-export async function updateUser(id: string, updates: Partial<Pick<UserRow, "role" | "category" | "branch_id">>): Promise<void> {
+export async function updateUser(id: string, updates: Partial<Pick<UserRow, "role" | "role_id" | "category" | "branch_id">>): Promise<void> {
   return usersApi.updateUser(id, updates)
 }
 

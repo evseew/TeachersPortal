@@ -12,55 +12,17 @@ import { SidebarNav } from "@/components/sidebar-nav"
 import { TopNav } from "@/components/top-nav"
 // import { useBranchOperations } from "@/hooks/use-branch-operations" // Временно отключено
 import { BranchDeleteConfirmation } from "@/components/branch-delete-confirmation"
+import { RolesManagement } from "@/components/system/roles-management"
 import type { Branch } from "@/lib/types/shared"
 import { systemApi } from "@/lib/clients/system.client"
 
 // Используем тип Branch из API вместо BranchRow
 
-const initialUserRoles = [
-  { id: 1, name: "Administrator", description: "Full system access", color: "bg-red-100 text-red-800" },
-  { id: 2, name: "Senior Teacher", description: "Advanced teaching features", color: "bg-blue-100 text-blue-800" },
-  { id: 3, name: "Teacher", description: "Basic teaching access", color: "bg-green-100 text-green-800" },
-  { id: 4, name: "Salesman", description: "Sales and customer management", color: "bg-purple-100 text-purple-800" },
-  {
-    id: 5,
-    name: "Head of Sales",
-    description: "Sales team leadership and analytics",
-    color: "bg-orange-100 text-orange-800",
-  },
-  {
-    id: 6,
-    name: "Regular User",
-    description: "Basic user from Pyrus sync, awaiting role assignment",
-    color: "bg-gray-100 text-gray-800",
-  },
-]
+// Старые роли перенесены в базу данных и управляются через RolesManagement компонент
 
-const systemSections = [
-  { id: 1, name: "September Rating", description: "Access to rating dashboard and leaderboards" },
-  { id: 2, name: "Mass KPI Input", description: "Access to KPI input and management tools" },
-  { id: 3, name: "System", description: "Access to system administration and configuration" },
-]
+// Старые разрешения перенесены в новую систему ролей
 
-const initialPermissions = {
-  Administrator: [1, 2, 3],
-  "Senior Teacher": [1, 2],
-  Teacher: [1],
-  Salesman: [1],
-  "Head of Sales": [1, 3],
-  "Regular User": [], // Нет доступа к модулям, только профиль
-}
-
-const PermissionCheckbox = ({ checked, onToggle }: { checked: boolean; onToggle: () => void }) => {
-  return (
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onToggle}
-      className="h-4 w-4 text-[#7A9B28] bg-gray-100 border-gray-300 rounded focus:ring-[#7A9B28] focus:ring-2"
-    />
-  )
-}
+// Старый PermissionCheckbox убран - теперь в RolesManagement компоненте
 
 export default function SystemConfigurationPage() {
   // Branch management - временная заглушка
@@ -134,13 +96,7 @@ export default function SystemConfigurationPage() {
     branch: Branch | null
   }>({ isOpen: false, branch: null })
 
-  // Role management (existing)
-  const [userRoles, setUserRoles] = useState(initialUserRoles)
-  const [permissions, setPermissions] = useState(initialPermissions)
-  const [newRole, setNewRole] = useState({ name: "", description: "" })
-  const [editingRole, setEditingRole] = useState<number | null>(null)
-  const [editRole, setEditRole] = useState({ name: "", description: "" })
-  const [isAddingRole, setIsAddingRole] = useState(false)
+  // Role management теперь в RolesManagement компоненте
   const { toast } = useToast()
 
   // Branch handlers
@@ -181,108 +137,11 @@ export default function SystemConfigurationPage() {
     return success
   }
 
-  const addRole = () => {
-    console.log("[v0] addRole called with:", newRole)
+  // Функции управления ролями перенесены в RolesManagement компонент
 
-    if (!newRole.name.trim() || !newRole.description.trim()) {
-      console.log("[v0] Validation failed - empty fields")
-      return
-    }
-
-    // Check for duplicate role names
-    const existingRole = userRoles.find((role) => role.name.toLowerCase() === newRole.name.trim().toLowerCase())
-
-    if (existingRole) {
-      console.log("[v0] Role already exists")
-      alert("A role with this name already exists!")
-      return
-    }
-
-    console.log("[v0] Adding role...")
-    setIsAddingRole(true)
-
-    try {
-      const colors = [
-        "bg-purple-100 text-purple-800",
-        "bg-orange-100 text-orange-800",
-        "bg-teal-100 text-teal-800",
-        "bg-pink-100 text-pink-800",
-      ]
-
-      const newRoleObj = {
-        id: Date.now(), // Use timestamp for unique ID
-        name: newRole.name.trim(),
-        description: newRole.description.trim(),
-        color: colors[userRoles.length % colors.length],
-      }
-
-      setUserRoles((prev) => [...prev, newRoleObj])
-      setPermissions((prev) => ({ ...prev, [newRole.name.trim()]: [] }))
-      setNewRole({ name: "", description: "" })
-      console.log("[v0] Role added successfully:", newRoleObj)
-    } catch (error) {
-      console.error("[v0] Error adding role:", error)
-    } finally {
-      setIsAddingRole(false)
-    }
-  }
-
-  const startEditingRole = (role: (typeof initialUserRoles)[0]) => {
-    setEditingRole(role.id)
-    setEditRole({ name: role.name, description: role.description })
-  }
-
-  const saveRoleEdit = (id: number) => {
-    const oldRole = userRoles.find((r) => r.id === id)
-    if (oldRole) {
-      setUserRoles(
-        userRoles.map((role) =>
-          role.id === id ? { ...role, name: editRole.name, description: editRole.description } : role,
-        ),
-      )
-
-      if (oldRole.name !== editRole.name) {
-        const updatedPermissions = { ...permissions } as Record<string, number[]>
-        // Безопасное копирование прав для переименованной роли
-        if (oldRole.name in updatedPermissions) {
-          updatedPermissions[editRole.name] = updatedPermissions[oldRole.name]
-          delete updatedPermissions[oldRole.name]
-          setPermissions(updatedPermissions as typeof permissions)
-        }
-      }
-    }
-    setEditingRole(null)
-  }
-
-  const cancelRoleEdit = () => {
-    setEditingRole(null)
-    setEditRole({ name: "", description: "" })
-  }
-
-  const deleteRole = (id: number) => {
-    const roleToDelete = userRoles.find((r) => r.id === id)
-    if (roleToDelete) {
-      setUserRoles(userRoles.filter((role) => role.id !== id))
-      const updatedPermissions = { ...permissions } as Record<string, number[]>
-      delete updatedPermissions[roleToDelete.name]
-      setPermissions(updatedPermissions as typeof permissions)
-    }
-  }
-
-  const togglePermission = (role: string, sectionId: number) => {
-    setPermissions((prev) => {
-      const prevAsRecord = prev as Record<string, number[]>
-      return {
-        ...prev,
-        [role]: prevAsRecord[role]?.includes(sectionId) 
-          ? prevAsRecord[role].filter((id) => id !== sectionId) 
-          : [...(prevAsRecord[role] || []), sectionId],
-      } as typeof prev
-    })
-  }
+  // togglePermission убран - теперь в RolesManagement компоненте
 
   const isBranchFormValid = newBranch.name.trim().length > 0 && newBranch.name.trim().length <= 100
-  const isRoleFormValid = newRole.name.trim().length > 0 && newRole.description.trim().length > 0
 
   console.log("[v0] Branch form state:", {
     name: newBranch.name,
@@ -290,12 +149,7 @@ export default function SystemConfigurationPage() {
     isAdding: branchOperations.isSubmitting,
   })
 
-  console.log("[v0] Role form state:", {
-    name: newRole.name,
-    description: newRole.description,
-    isValid: isRoleFormValid,
-    isAdding: isAddingRole,
-  })
+  // Старые console.log убраны вместе с переменными ролей
 
   // Load branches on mount
   useEffect(() => {
@@ -518,213 +372,9 @@ export default function SystemConfigurationPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-2">
-              <CardHeader className="border-b bg-muted/30">
-                <CardTitle className="flex items-center space-x-3 text-xl">
-                  <div className="p-2 bg-[#7A9B28] rounded-lg">
-                    <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <span>User Roles</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg border">
-                    <Input
-                      placeholder="Role name"
-                      value={newRole.name}
-                      onChange={(e) => {
-                        console.log("[v0] Role name changed:", e.target.value)
-                        setNewRole({ ...newRole, name: e.target.value })
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          addRole()
-                        }
-                      }}
-                    />
-                    <Input
-                      placeholder="Role description"
-                      value={newRole.description}
-                      onChange={(e) => {
-                        console.log("[v0] Role description changed:", e.target.value)
-                        setNewRole({ ...newRole, description: e.target.value })
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault()
-                          addRole()
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={addRole}
-                      className="bg-[#7A9B28] hover:bg-[#5A7020]"
-                      disabled={isAddingRole || !isRoleFormValid}
-                    >
-                      {isAddingRole ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Adding...
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Role
-                        </>
-                      )}
-                    </Button>
-                  </div>
+            <RolesManagement />
 
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-12 gap-4 py-2 px-4 bg-gray-100 rounded-lg font-semibold text-sm">
-                      <div className="col-span-1">#</div>
-                      <div className="col-span-3">Role Name</div>
-                      <div className="col-span-5">Description</div>
-                      <div className="col-span-1">Sections</div>
-                      <div className="col-span-2">Actions</div>
-                    </div>
-
-                    {userRoles.map((role, index) => (
-                      <div
-                        key={role.id}
-                        className="grid grid-cols-12 gap-4 py-3 px-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all duration-200"
-                      >
-                        <div className="col-span-1 flex items-center">
-                          <span className="text-muted-foreground font-medium">{index + 1}</span>
-                        </div>
-
-                        <div className="col-span-3 flex items-center">
-                          {editingRole === role.id ? (
-                            <Input
-                              value={editRole.name}
-                              onChange={(e) => setEditRole({ ...editRole, name: e.target.value })}
-                              className="h-8"
-                            />
-                          ) : (
-                            <Badge className={role.color}>{role.name}</Badge>
-                          )}
-                        </div>
-
-                        <div className="col-span-5 flex items-center">
-                          {editingRole === role.id ? (
-                            <Input
-                              value={editRole.description}
-                              onChange={(e) => setEditRole({ ...editRole, description: e.target.value })}
-                              className="h-8"
-                            />
-                          ) : (
-                            <span className="text-muted-foreground">{role.description}</span>
-                          )}
-                        </div>
-
-                        <div className="col-span-1 flex items-center">
-                          <span className="text-sm font-medium text-[#7A9B28]">
-                            {(permissions as Record<string, number[]>)[role.name]?.length || 0}
-                          </span>
-                        </div>
-
-                        <div className="col-span-2 flex items-center space-x-2">
-                          {editingRole === role.id ? (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => saveRoleEdit(role.id)}
-                                className="h-8 px-2 text-green-600 hover:text-green-700 border-green-200"
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={cancelRoleEdit}
-                                className="h-8 px-2 text-gray-600 hover:text-gray-700 bg-transparent"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => startEditingRole(role)}
-                                className="h-8 px-2"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => deleteRole(role.id)}
-                                className="h-8 px-2 text-red-600 hover:text-red-700 border-red-200"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2">
-              <CardHeader className="border-b bg-muted/30">
-                <CardTitle className="flex items-center space-x-3 text-xl">
-                  <div className="p-2 bg-[#7A9B28] rounded-lg">
-                    <Shield className="h-5 w-5 text-white" />
-                  </div>
-                  <span>Access Permissions</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-4 px-4 font-semibold">System Section</th>
-                        {userRoles.map((role) => (
-                          <th key={role.id} className="text-center py-4 px-4 font-semibold">
-                            {role.name}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {systemSections.map((section) => (
-                        <tr key={section.id} className="border-b border-gray-100 hover:bg-gray-50">
-                          <td className="py-4 px-4">
-                            <div>
-                              <div className="font-medium">{section.name}</div>
-                              <div className="text-sm text-muted-foreground">{section.description}</div>
-                            </div>
-                          </td>
-                          {userRoles.map((role) => (
-                            <td key={role.id} className="py-4 px-4 text-center">
-                              <PermissionCheckbox
-                                checked={(permissions as Record<string, number[]>)[role.name]?.includes(section.id) || false}
-                                onToggle={() => togglePermission(role.name, section.id)}
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="mt-6 flex justify-end">
-                  <Button className="bg-[#7A9B28] hover:bg-[#5A7020]">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Permissions
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Управление разрешениями будет добавлено позже в RolesManagement компонент */}
           </div>
         </main>
       </div>

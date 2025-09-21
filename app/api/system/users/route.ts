@@ -11,8 +11,8 @@ const getUsersHandler = async (request: NextRequest) => {
     const { searchParams } = new URL(request.url)
     const q = (searchParams.get("q") ?? "").toLowerCase()
     const { data, error } = await supabaseAdmin
-      .from("profiles")
-      .select("user_id, email, full_name, role, category, branch_id, avatar_url, branch:branch_id(name)")
+      .from("profiles_with_role")
+      .select("user_id, email, full_name, role, category, branch_id, avatar_url, role_id, permissions, branch:branch_id(name)")
       .order("full_name", { ascending: true })
     if (error) throw error
     const mapped = (data ?? []).map((r: any) => ({

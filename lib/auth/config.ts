@@ -75,10 +75,10 @@ export const authOptions: NextAuthOptions = {
           if (token.role && typeof token.role === 'string') {
             session.user.role = token.role as UserRole
           } else {
-            // Для OAuth провайдеров получаем роль из БД
+            // Для OAuth провайдеров получаем роль из БД через profiles_with_role view
             try {
               const { data: profile } = await supabaseAdmin
-                .from('profiles')
+                .from('profiles_with_role')
                 .select('role')
                 .eq('email', token.email)
                 .single()
