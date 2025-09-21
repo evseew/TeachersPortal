@@ -35,22 +35,29 @@ export interface RolePermission {
   category: string
 }
 
-// Предопределенные разрешения
+// Предопределенные разрешения по разделам сайта
 export const SYSTEM_PERMISSIONS: RolePermission[] = [
-  { id: 'system', name: 'System Management', description: 'Full system administration', category: 'Administration' },
-  { id: 'users', name: 'User Management', description: 'Manage users and their roles', category: 'Administration' },
-  { id: 'roles', name: 'Role Management', description: 'Create and modify roles', category: 'Administration' },
-  { id: 'kpi', name: 'KPI Input', description: 'Input and modify KPI data', category: 'Teaching' },
-  { id: 'rating', name: 'View Ratings', description: 'View leaderboards and ratings', category: 'Teaching' },
-  { id: 'system_readonly', name: 'System Read-Only', description: 'View system settings (read-only)', category: 'Administration' },
-  { id: 'profile', name: 'Profile Access', description: 'Basic profile management', category: 'Basic' },
+  // Административные разрешения (только для Administrator)
+  { id: 'system', name: 'System Management', description: 'Полное управление системой', category: 'Администрирование' },
+  { id: 'users', name: 'User Management', description: 'Управление пользователями и их ролями', category: 'Администрирование' },
+  { id: 'roles', name: 'Role Management', description: 'Создание и изменение ролей', category: 'Администрирование' },
+  
+  // Основные разделы сайта
+  { id: 'september_rating', name: 'September Rating', description: 'Доступ к разделу рейтинга за сентябрь и всем его подстраницам', category: 'Основные разделы' },
+  { id: 'mass_kpi_input', name: 'Mass KPI Input', description: 'Доступ к разделу массового ввода KPI', category: 'Основные разделы' },
+  { id: 'newcomers_rating', name: 'Newcomers Rating', description: 'Доступ к разделу рейтинга новичков', category: 'Основные разделы' },
+  { id: 'dashboard', name: 'Dashboard', description: 'Доступ к главной панели управления', category: 'Основные разделы' },
+  
+  // Базовые разрешения
+  { id: 'profile', name: 'Profile Access', description: 'Управление собственным профилем', category: 'Базовые' },
+  { id: 'settings', name: 'Settings', description: 'Доступ к личным настройкам', category: 'Базовые' },
 ]
 
 // Группировка разрешений по категориям
 export const PERMISSION_CATEGORIES = {
-  'Administration': SYSTEM_PERMISSIONS.filter(p => p.category === 'Administration'),
-  'Teaching': SYSTEM_PERMISSIONS.filter(p => p.category === 'Teaching'),
-  'Basic': SYSTEM_PERMISSIONS.filter(p => p.category === 'Basic'),
+  'Администрирование': SYSTEM_PERMISSIONS.filter(p => p.category === 'Администрирование'),
+  'Основные разделы': SYSTEM_PERMISSIONS.filter(p => p.category === 'Основные разделы'),
+  'Базовые': SYSTEM_PERMISSIONS.filter(p => p.category === 'Базовые'),
 }
 
 // Цвета для новых ролей

@@ -11,10 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
+import { useUserRole } from "@/hooks/use-user-role"
 import { rolesApi } from "@/lib/clients/roles.client"
 import { type Role, type CreateRoleRequest, SYSTEM_PERMISSIONS, PERMISSION_CATEGORIES, ROLE_COLORS } from "@/lib/types/roles"
 
 export function RolesManagement() {
+  const { isAdmin, isHeadOfSales, isLoading: userLoading, isAuthenticated } = useUserRole()
   const [roles, setRoles] = useState<Role[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,8 +51,14 @@ export function RolesManagement() {
   }
 
   useEffect(() => {
-    loadRoles()
-  }, [])
+    // Загружаем роли только если пользователь авторизован и имеет нужные права
+    if (!userLoading && isAuthenticated && (isAdmin || isHeadOfSales)) {
+      loadRoles()
+    } else if (!userLoading && (!isAuthenticated || (!isAdmin && !isHeadOfSales))) {
+      setLoading(false)
+      setError("У вас нет прав для просмотра ролей")
+    }
+  }, [userLoading, isAuthenticated, isAdmin, isHeadOfSales])
 
   // Создание роли
   const handleCreateRole = async () => {
@@ -212,13 +220,14 @@ export function RolesManagement() {
             <Shield className="h-5 w-5" />
             Управление ролями
           </CardTitle>
-          <Dialog open={isCreating} onOpenChange={setIsCreating}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Добавить роль
-              </Button>
-            </DialogTrigger>
+          {isAdmin && (
+            <Dialog open={isCreating} onOpenChange={setIsCreating}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Добавить роль
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Создать новую роль</DialogTitle>
@@ -299,7 +308,8 @@ export function RolesManagement() {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -315,7 +325,7 @@ export function RolesManagement() {
                         <Input
                           value={roleForm.name}
                           onChange={(e) => setRoleForm(prev => ({ ...prev, name: e.target.value }))}
-                          disabled={role.is_system} // системные роли нельзя переименовывать
+                          disabled={role.name === "Administrator"} // только Administrator нельзя переименовывать
                           placeholder="2-50 символов"
                         />
                         <p className="text-xs text-gray-500 mt-1">{roleForm.name.length}/50</p>
@@ -348,6 +358,39 @@ export function RolesManagement() {
                     <p className="text-xs text-gray-500 mt-1">{roleForm.description.length}/200 символов</p>
                   </div>
                   
+                  <div>
+                    <Label>Разрешения</Label>
+                    <div className="space-y-4 mt-2">
+                      {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
+                        <div key={category}>
+                          <h4 className="font-medium text-sm text-gray-700 mb-2">{category}</h4>
+                          <div className="space-y-2">
+                            {permissions.map((permission) => (
+                              <div key={permission.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`edit-${permission.id}`}
+                                  checked={roleForm.permissions?.includes(permission.id)}
+                                  onCheckedChange={() => togglePermission(permission.id)}
+                                  disabled={role.name === "Administrator" && ['system', 'users', 'roles'].includes(permission.id)} // только Administrator имеет защищенные разрешения
+                                />
+                                <Label htmlFor={`edit-${permission.id}`} className="text-sm">
+                                  {permission.name}
+                                  <span className="text-gray-500 ml-1">- {permission.description}</span>
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {role.name === "Administrator" && (
+                      <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                        <Settings className="h-3 w-3" />
+                        Административные разрешения (system, users, roles) защищены для роли Administrator
+                      </p>
+                    )}
+                  </div>
+                  
                   <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={cancelEditing}>
                       <X className="h-4 w-4 mr-1" />
@@ -365,25 +408,27 @@ export function RolesManagement() {
                     <Badge className={role.color}>
                       {role.name}
                     </Badge>
-                    {role.is_system && (
+                    {role.name === "Administrator" && (
                       <Badge variant="outline" className="text-xs">
                         <Settings className="h-3 w-3 mr-1" />
-                        Системная
+                        Защищенная
                       </Badge>
                     )}
                     <span className="text-gray-600">{role.description}</span>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => startEditingRole(role)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEditingRole(role)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
                     
-                    {!role.is_system && (
+                    {isAdmin && role.name !== "Administrator" && (
                       <Button
                         variant="ghost"
                         size="sm"
