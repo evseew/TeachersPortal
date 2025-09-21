@@ -13,6 +13,7 @@ import { TopNav } from "@/components/top-nav"
 // import { useBranchOperations } from "@/hooks/use-branch-operations" // Временно отключено
 import { BranchDeleteConfirmation } from "@/components/branch-delete-confirmation"
 import type { Branch } from "@/lib/types/shared"
+import { systemApi } from "@/lib/clients/system.client"
 
 // Используем тип Branch из API вместо BranchRow
 
@@ -77,16 +78,50 @@ export default function SystemConfigurationPage() {
     isSubmitting,
     editingBranchId,
     createBranch: async (data: { name: string }) => {
-      console.warn("Branch operations temporarily disabled")
-      return false
+      try {
+        setIsSubmitting(true)
+        const created = await systemApi.createBranch(data.name)
+        setBranches((prev) => [...prev, created])
+        toast({ title: "Филиал добавлен", description: `«${created.name}» успешно создан` })
+        return true
+      } catch (error: any) {
+        console.error("Create branch failed:", error)
+        toast({ title: "Ошибка", description: error?.message || "Не удалось создать филиал", variant: "destructive" })
+        return false
+      } finally {
+        setIsSubmitting(false)
+      }
     },
     updateBranch: async (id: string, data: { name: string }) => {
-      console.warn("Branch operations temporarily disabled")
-      return false
+      try {
+        setIsSubmitting(true)
+        const updated = await systemApi.updateBranch(id, data.name)
+        setBranches((prev) => prev.map((b) => (b.id === id ? updated : b)))
+        setEditingBranchId(null)
+        toast({ title: "Филиал обновлен", description: `«${updated.name}» успешно изменен` })
+        return true
+      } catch (error: any) {
+        console.error("Update branch failed:", error)
+        toast({ title: "Ошибка", description: error?.message || "Не удалось обновить филиал", variant: "destructive" })
+        return false
+      } finally {
+        setIsSubmitting(false)
+      }
     },
     deleteBranch: async (id: string) => {
-      console.warn("Branch operations temporarily disabled")
-      return false
+      try {
+        setIsSubmitting(true)
+        await systemApi.deleteBranch(id)
+        setBranches((prev) => prev.filter((b) => b.id !== id))
+        toast({ title: "Филиал удален", description: "Филиал успешно удален" })
+        return true
+      } catch (error: any) {
+        console.error("Delete branch failed:", error)
+        toast({ title: "Ошибка", description: error?.message || "Не удалось удалить филиал", variant: "destructive" })
+        return false
+      } finally {
+        setIsSubmitting(false)
+      }
     },
     startEditing: (id: string) => setEditingBranchId(id),
     cancelEditing: () => setEditingBranchId(null),
