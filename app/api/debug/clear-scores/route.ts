@@ -20,10 +20,10 @@ export async function POST() {
       success: true, 
       message: "Branch scores cleared and recomputed" 
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error clearing scores:", error)
     return NextResponse.json({ 
-      error: error.message ?? "Internal error" 
+      error: error instanceof Error ? error.message : "Internal error" 
     }, { status: 500 })
   }
 }

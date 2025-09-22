@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase/admin"
-import { USER_ROLES, TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
+import { TEACHER_CATEGORIES, isTeacherRole } from "@/lib/constants/user-management"
 import { withAuth } from "@/lib/middleware/auth-middleware"
 
 const updateUserHandler = async (request: NextRequest, { params }: { params: { id: string } }) => {
   try {
     const body = await request.json()
     const id = params.id
-    const updates: any = {}
+    const updates: Record<string, unknown> = {}
     
     // Получаем текущие данные пользователя для проверки роли
     const { data: currentUser, error: fetchError } = await supabaseAdmin
@@ -114,9 +114,9 @@ const updateUserHandler = async (request: NextRequest, { params }: { params: { i
     }
     
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PATCH /api/system/users/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 
@@ -148,7 +148,7 @@ const deleteUserHandler = async (request: NextRequest, { params }: { params: { i
       
       if (countError) throw countError
       
-      if ((adminCount as any[])?.length <= 1) {
+      if ((adminCount as unknown[])?.length <= 1) {
         return NextResponse.json({ 
           error: "Cannot delete the last administrator" 
         }, { status: 400 })
@@ -167,9 +167,9 @@ const deleteUserHandler = async (request: NextRequest, { params }: { params: { i
       ok: true, 
       message: `User ${user.email} deleted successfully` 
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/system/users/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

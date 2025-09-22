@@ -21,9 +21,9 @@ const getRolesHandler = async (request: NextRequest) => {
     if (error) throw error
 
     return NextResponse.json(data || [])
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/system/roles", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 
@@ -80,9 +80,9 @@ const createRoleHandler = async (request: NextRequest) => {
     if (error) throw error
 
     return NextResponse.json(data, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/system/roles", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

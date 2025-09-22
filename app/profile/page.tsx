@@ -37,17 +37,17 @@ export default function ProfilePage() {
         // Берём профиль из API Users по email
         const res = await fetch(`/api/system/users`)
         if (res.ok) {
-          const users = (await res.json()) as any[]
+          const users = (await res.json()) as Record<string, unknown>[]
           const u = users.find((x) => x.email === email)
           if (u) {
             setProfileData((prev) => ({
               ...prev,
-              name: u.full_name ?? email,
+              name: String(u.full_name ?? email),
               email,
-              role: u.role,
-              branch: u.branch_name ?? "—",
+              role: String(u.role),
+              branch: String(u.branch_name ?? "—"),
             }))
-            setEditData((prev) => ({ ...prev, name: u.full_name ?? email }))
+            setEditData((prev) => ({ ...prev, name: String(u.full_name ?? email) }))
           }
         }
       } catch {
@@ -55,7 +55,7 @@ export default function ProfilePage() {
       }
     }
     void load()
-  }, [])
+  }, [profileData.email])
 
   const emojiOptions = [
     "😊",

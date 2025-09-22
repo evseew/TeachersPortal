@@ -75,7 +75,7 @@ export async function GET() {
       }))
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Ошибка при тестировании Pyrus API:', error)
     return NextResponse.json({
       success: false,

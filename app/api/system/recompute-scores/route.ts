@@ -45,11 +45,12 @@ export async function POST(request: Request) {
       })
     }
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ [API] recompute-scores: Ошибка пересчета:", error)
+    const errorMessage = error instanceof Error ? error.message : "Internal error"
     return NextResponse.json({ 
       ok: false,
-      error: error.message ?? "Internal error" 
+      error: errorMessage 
     }, { status: 500 })
   }
 }

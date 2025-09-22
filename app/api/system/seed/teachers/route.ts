@@ -73,12 +73,12 @@ export async function POST(req: Request) {
       const { error: updErr } = await supabaseAdmin
         .from("profiles")
         .update({ role: "Teacher", category: t.category, branch_id: targetBranchId })
-        .eq("user_id", (data as any).user_id)
+        .eq("user_id", (data as Record<string, unknown>).user_id)
       if (updErr) throw updErr
       created.push({
-        user_id: (data as any).user_id,
-        email: (data as any).email,
-        full_name: (data as any).full_name ?? t.full_name,
+        user_id: (data as Record<string, unknown>).user_id,
+        email: (data as Record<string, unknown>).email,
+        full_name: (data as Record<string, unknown>).full_name ?? t.full_name,
         category: t.category,
       })
     }
@@ -111,9 +111,9 @@ export async function POST(req: Request) {
     if (recErr) throw recErr
 
     return NextResponse.json({ ok: true, branch_id: targetBranchId, teachers: created })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/system/seed/teachers", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

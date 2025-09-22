@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result, { status: 200 })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("💥 Ошибка API:", error)
     return NextResponse.json({
       error: error.message,

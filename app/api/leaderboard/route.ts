@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 async function leaderboardHandler(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const type = searchParams.get("type")
-  const isDev = process.env.NODE_ENV !== "production"
+  // const isDev = process.env.NODE_ENV !== "production" // Unused variable removed
 
   try {
     if (type === "branch_overall") {
@@ -22,7 +22,7 @@ async function leaderboardHandler(request: NextRequest) {
       return NextResponse.json(data)
     }
     return NextResponse.json({ error: "Invalid type" }, { status: 400 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("/api/leaderboard error", error)
     throw error // Middleware обработает ошибку
   }

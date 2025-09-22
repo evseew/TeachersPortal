@@ -39,9 +39,9 @@ export async function POST() {
     if (pfErr) throw pfErr
 
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/system/reset-teachers", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

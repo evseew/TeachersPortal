@@ -74,7 +74,7 @@ export async function POST() {
       }
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[FIX-BRANCHES] Operation failed:", error)
     return NextResponse.json({ 
       success: false, 

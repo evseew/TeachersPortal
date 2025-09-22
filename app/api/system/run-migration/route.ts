@@ -65,7 +65,7 @@ export async function POST() {
       explanation: "This will replace the teacher leaderboard view to show ALL teachers from profiles table instead of only those in current_scores, eliminating duplicates."
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[MIGRATION] Failed:", error)
     return NextResponse.json({ 
       success: false, 

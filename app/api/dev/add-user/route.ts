@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       user: devUser
     })
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Ошибка при добавлении dev пользователя:', error)
     return NextResponse.json({
       error: error.message || 'Ошибка при добавлении dev пользователя'

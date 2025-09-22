@@ -38,10 +38,10 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
         profileDetails: linkedProfiles.slice(0, 5), // Первые 5 для показа
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/system/branches/[id]/check-usage", error)
     return NextResponse.json({ 
-      error: error.message ?? "Internal error" 
+      error: error instanceof Error ? error.message : "Internal error" 
     }, { status: 500 })
   }
 }

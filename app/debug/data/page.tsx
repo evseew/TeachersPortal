@@ -5,16 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 export default function DebugDataPage() {
-  const [branchData, setBranchData] = useState<any>(null)
-  const [teacherData, setTeacherData] = useState<any>(null)
-  const [usersData, setUsersData] = useState<any>(null)
-  const [syncResult, setSyncResult] = useState<any>(null)
+  const [branchData, setBranchData] = useState<unknown>(null)
+  const [teacherData, setTeacherData] = useState<unknown>(null)
+  const [usersData, setUsersData] = useState<unknown>(null)
+  const [syncResult, setSyncResult] = useState<unknown>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [migrating, setMigrating] = useState(false)
-  const [migrationResult, setMigrationResult] = useState<any>(null)
-  const [dbAnalysis, setDbAnalysis] = useState<any>(null)
+  const [migrationResult, setMigrationResult] = useState<unknown>(null)
+  const [dbAnalysis, setDbAnalysis] = useState<unknown>(null)
   const [analyzing, setAnalyzing] = useState(false)
 
   const fetchData = async () => {
@@ -44,9 +44,9 @@ export default function DebugDataPage() {
       console.log("Users response:", usersJson)
       setUsersData(usersJson)
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching data:", err)
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
     }
@@ -69,7 +69,7 @@ export default function DebugDataPage() {
         // Refresh data after sync
         await fetchData()
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error syncing:", err)
       setError(`Sync error: ${err.message}`)
     } finally {
@@ -94,7 +94,7 @@ export default function DebugDataPage() {
         // Refresh data after migration
         await fetchData()
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error migrating:", err)
       setError(`Migration error: ${err.message}`)
     } finally {
@@ -111,7 +111,7 @@ export default function DebugDataPage() {
       const dbJson = await dbRes.json()
       console.log("Database analysis:", dbJson)
       setDbAnalysis(dbJson)
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error analyzing database:", err)
       setError(`Database analysis error: ${err.message}`)
     } finally {

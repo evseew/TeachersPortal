@@ -35,7 +35,7 @@ async function metricsHandler(request: NextRequest) {
     if (error) throw error
 
     return NextResponse.json(data || [])
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/metrics", error)
     throw error // Middleware обработает ошибку
   }

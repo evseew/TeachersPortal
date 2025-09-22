@@ -44,9 +44,10 @@ export default function DevLoginPage() {
       } else {
         throw new Error(result?.error || 'Ошибка входа в систему')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Ошибка автологина:', error)
-      setError(error.message || 'Произошла ошибка при входе')
+      const errorMessage = error instanceof Error ? error.message : 'Произошла ошибка при входе'
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }

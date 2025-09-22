@@ -15,7 +15,7 @@ const getUsersHandler = async (request: NextRequest) => {
       .select("user_id, email, full_name, role, category, branch_id, avatar_url, role_id, permissions, branch:branch_id(name)")
       .order("full_name", { ascending: true })
     if (error) throw error
-    const mapped = (data ?? []).map((r: any) => ({
+    const mapped = (data ?? []).map((r: Record<string, unknown>) => ({
       user_id: r.user_id,
       email: r.email,
       full_name: r.full_name ?? r.email,
@@ -23,18 +23,19 @@ const getUsersHandler = async (request: NextRequest) => {
       category: r.category,
       branch_id: r.branch_id,
       avatar_url: r.avatar_url,
-      branch_name: r.branch?.name ?? null,
+      branch_name: (r.branch as any)?.name ?? null,
     }))
     const filtered = q
       ? mapped.filter(
-          (u: any) =>
-            u.full_name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || (u.branch_name ?? "").toLowerCase().includes(q),
+          (u: Record<string, unknown>) =>
+            String(u.full_name).toLowerCase().includes(q) || String(u.email).toLowerCase().includes(q) || String(u.branch_name ?? "").toLowerCase().includes(q),
         )
       : mapped
     return NextResponse.json(filtered)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/system/users", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Internal error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

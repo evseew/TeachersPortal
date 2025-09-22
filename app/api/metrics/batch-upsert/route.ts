@@ -35,9 +35,10 @@ const batchUpsertHandler = async (request: NextRequest) => {
         reason: recomputeResult.reason
       }
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("/api/metrics/batch-upsert error", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Internal error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

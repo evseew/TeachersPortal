@@ -86,8 +86,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     return NextResponse.json(teacherData)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/teacher/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }

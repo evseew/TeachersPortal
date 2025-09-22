@@ -79,7 +79,7 @@ async function performanceHandler(request: NextRequest) {
           success: true,
           data: dbStats
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new Error(`Database stats error: ${error.message}`)
       }
 
@@ -99,7 +99,7 @@ async function performanceHandler(request: NextRequest) {
             timestamp: new Date().toISOString()
           }
         })
-      } catch (error: any) {
+      } catch (error: unknown) {
         throw new Error(`System stats error: ${error.message}`)
       }
 
@@ -151,7 +151,7 @@ async function getDatabaseStats() {
         last_check: new Date().toISOString()
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Database stats error:', error)
     return {
       error: error.message,

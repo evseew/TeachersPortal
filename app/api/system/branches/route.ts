@@ -6,9 +6,10 @@ export async function GET() {
     const { data, error } = await supabaseAdmin.from("branch").select("id,name").order("name")
     if (error) throw error
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/system/branches", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Internal error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
@@ -20,9 +21,10 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseAdmin.from("branch").insert({ name }).select("id,name").single()
     if (error) throw error
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("POST /api/system/branches", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Internal error"
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 

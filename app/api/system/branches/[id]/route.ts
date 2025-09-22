@@ -11,9 +11,9 @@ export async function PATCH(_: Request, { params }: { params: { id: string } }) 
     const { data, error } = await supabaseAdmin.from("branch").update({ name }).eq("id", id).select("id,name").single()
     if (error) throw error
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PATCH /api/system/branches/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 
@@ -24,9 +24,9 @@ export async function DELETE(_: Request, { params }: { params: { id: string } })
     const { error } = await supabaseAdmin.from("branch").delete().eq("id", id)
     if (error) throw error
     return NextResponse.json({ ok: true })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/system/branches/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

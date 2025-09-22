@@ -23,9 +23,9 @@ const getRoleHandler = async (request: NextRequest, { params }: { params: { id: 
     }
 
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("GET /api/system/roles/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 
@@ -50,7 +50,7 @@ const updateRoleHandler = async (request: NextRequest, { params }: { params: { i
       throw fetchError
     }
 
-    const updates: any = {}
+    const updates: Record<string, unknown> = {}
 
     // Валидация и подготовка обновлений
     if (body.name !== undefined) {
@@ -115,9 +115,9 @@ const updateRoleHandler = async (request: NextRequest, { params }: { params: { i
     if (error) throw error
 
     return NextResponse.json(data)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("PATCH /api/system/roles/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 
@@ -164,9 +164,9 @@ const deleteRoleHandler = async (request: NextRequest, { params }: { params: { i
           throw usersError
         }
       } else {
-        userCount = (users as any[])?.length || 0
+        userCount = (users as unknown[])?.length || 0
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Если ошибка enum - роль точно не используется пользователями
       if (error.message?.includes('invalid input value for enum')) {
         userCount = 0
@@ -193,9 +193,9 @@ const deleteRoleHandler = async (request: NextRequest, { params }: { params: { i
       ok: true, 
       message: `Role "${role.name}" deleted successfully` 
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("DELETE /api/system/roles/[id]", error)
-    return NextResponse.json({ error: error.message ?? "Internal error" }, { status: 500 })
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Internal error" }, { status: 500 })
   }
 }
 

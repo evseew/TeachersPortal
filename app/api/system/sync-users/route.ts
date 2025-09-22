@@ -109,7 +109,7 @@ async function syncUsersHandler(request: NextRequest) {
           }
         }
         
-      } catch (error: any) {
+      } catch (error: unknown) {
         const errorMsg = `Ошибка обработки ${pyrusUser.email}: ${error.message}`
         syncResults.errors.push(errorMsg)
         console.error(`❌ ${errorMsg}`)
@@ -143,7 +143,7 @@ async function syncUsersHandler(request: NextRequest) {
         throw new Error(result.error || 'LeaderboardSyncService returned unsuccessful result')
       }
       
-    } catch (leaderboardError: any) {
+    } catch (leaderboardError: Record<string, unknown>) {
       console.error('⚠️ Ошибка синхронизации лидербордов:', leaderboardError)
       leaderboardSyncResult = {
         success: false,
@@ -165,7 +165,7 @@ async function syncUsersHandler(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ Ошибка синхронизации:', error)
     throw error // Middleware обработает ошибку
   }
