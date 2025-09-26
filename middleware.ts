@@ -1,6 +1,7 @@
 import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
 import { hasAccess } from "@/lib/auth/permissions"
+import { hasPluginRouteAccess } from "@/lib/auth/plugin-permissions"
 import { type UserRole } from "@/lib/constants/user-management"
 
 export default withAuth(
@@ -24,16 +25,29 @@ export default withAuth(
                            req.nextauth.token?.email === 'dev@planetenglish.ru'
 
     // Проверяем доступ только если роль определена
-    if (userRole && !isDevSystemPath && !hasAccess(userRole, pathname)) {
-      console.log(`🚫 Доступ запрещен: ${userRole} пытается попасть на ${pathname}`)
+    if (userRole && !isDevSystemPath) {
+      // Сначала проверяем стандартные разрешения
+      const hasStandardAccess = hasAccess(userRole, pathname)
+      
+      // Если нет стандартного доступа, проверяем плагины
+      let hasPluginAccess = false
+      if (!hasStandardAccess) {
+        const pluginAccessResult = hasPluginRouteAccess(userRole, pathname)
+        hasPluginAccess = pluginAccessResult.allowed
+      }
+      
+      // Если нет ни стандартного, ни плагинного доступа
+      if (!hasStandardAccess && !hasPluginAccess) {
+        console.log(`🚫 Доступ запрещен: ${userRole} пытается попасть на ${pathname}`)
 
-      // Если роль есть, но доступа нет - показываем 403 через redirect на специальную страницу
-      const searchParams = new URLSearchParams({
-        message: 'Недостаточно прав для доступа к этой странице',
-        role: userRole,
-        attempted: pathname
-      })
-      return NextResponse.redirect(new URL(`/auth/access-denied?${searchParams}`, req.url))
+        // Показываем 403 через redirect на специальную страницу
+        const searchParams = new URLSearchParams({
+          message: 'Недостаточно прав для доступа к этой странице',
+          role: userRole,
+          attempted: pathname
+        })
+        return NextResponse.redirect(new URL(`/auth/access-denied?${searchParams}`, req.url))
+      }
     }
 
     // Если роль не определена, логируем и пропускаем (роль будет получена позже)

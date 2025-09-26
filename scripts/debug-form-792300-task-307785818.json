@@ -1,0 +1,1012 @@
+{
+  "form_id": 792300,
+  "task_id": 307785818,
+  "task_title": "Без названия",
+  "fields": [
+    {
+      "id": 171,
+      "type": "note",
+      "name": "СТУДЕНТ НА ЗАНЯТИЕ",
+      "tooltip": "СТУДЕНТ НА ЗАНЯТИЕ",
+      "value": "СТУДЕНТ НА ЗАНЯТИЕ"
+    },
+    {
+      "id": 226,
+      "type": "catalog",
+      "name": "Филиал",
+      "tooltip": "",
+      "value": {
+        "item_id": 84081545,
+        "item_ids": [
+          84081545
+        ],
+        "headers": [
+          "Филиалы PE"
+        ],
+        "values": [
+          "Центр: Коммуны, 106/1"
+        ],
+        "rows": [
+          [
+            "Центр: Коммуны, 106/1"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 166,
+      "type": "number",
+      "name": "№ Группы",
+      "tooltip": "",
+      "value": 310
+    },
+    {
+      "id": 142,
+      "type": "person",
+      "name": "Преподаватель",
+      "tooltip": "",
+      "value": {
+        "id": 1158039,
+        "first_name": "Анастасия Алексеевна",
+        "last_name": "Нечунаева",
+        "email": "a.nechunaeva@planetenglish.ru",
+        "type": "user",
+        "department_id": 76738696,
+        "avatar_id": 126693,
+        "banned": false,
+        "position": "Преподаватель",
+        "skype": "xeoxy",
+        "messenger": {
+          "type": "Telegram",
+          "nickname": "xeoxy"
+        },
+        "phone": "89026061220",
+        "location": "Центр"
+      }
+    },
+    {
+      "id": 227,
+      "type": "catalog",
+      "name": "Программа",
+      "tooltip": "",
+      "value": {
+        "item_id": 102318739,
+        "item_ids": [
+          102318739
+        ],
+        "headers": [
+          "Программа"
+        ],
+        "values": [
+          "PE5 (3-5 кл)"
+        ],
+        "rows": [
+          [
+            "PE5 (3-5 кл)"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 228,
+      "type": "catalog",
+      "name": "Курс",
+      "tooltip": "",
+      "value": {
+        "item_id": 97122693,
+        "item_ids": [
+          97122693
+        ],
+        "headers": [
+          "Курсы"
+        ],
+        "values": [
+          "PE 5"
+        ],
+        "rows": [
+          [
+            "PE 5"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 220,
+      "type": "date",
+      "name": "Дата БПЗ",
+      "tooltip": "",
+      "value": "2025-09-27"
+    },
+    {
+      "id": 231,
+      "type": "text",
+      "name": "Время БПЗ",
+      "tooltip": "",
+      "value": "12:15"
+    },
+    {
+      "id": 204,
+      "type": "note",
+      "name": "Студент:",
+      "tooltip": "Студент:",
+      "value": "Студент:"
+    },
+    {
+      "id": 73,
+      "type": "text",
+      "name": "ФИО студента",
+      "tooltip": "",
+      "value": "Серёгина Мария Артёмовна"
+    },
+    {
+      "id": 202,
+      "type": "text",
+      "name": "Класс",
+      "tooltip": "",
+      "value": "3 класс"
+    },
+    {
+      "id": 134,
+      "type": "text",
+      "name": "Ситуация",
+      "tooltip": ""
+    },
+    {
+      "id": 221,
+      "type": "text",
+      "name": "Ожидания от обучения?",
+      "tooltip": ""
+    },
+    {
+      "id": 205,
+      "type": "text",
+      "name": "Что еще важно знать?",
+      "tooltip": ""
+    },
+    {
+      "id": 175,
+      "type": "multiple_choice",
+      "name": "Категория",
+      "tooltip": "",
+      "value": {
+        "choice_id": 4,
+        "choice_ids": [
+          4
+        ],
+        "choice_names": [
+          "повторный бпзшник"
+        ]
+      }
+    },
+    {
+      "id": 203,
+      "type": "note",
+      "name": "Контактное лицо:",
+      "tooltip": "Контактное лицо:",
+      "value": "Контактное лицо:"
+    },
+    {
+      "id": 103,
+      "type": "text",
+      "name": "ФИО конт.лица",
+      "tooltip": "",
+      "value": "Серёгина Татьяна Юрьевна"
+    },
+    {
+      "id": 105,
+      "type": "phone",
+      "name": "Телефон",
+      "tooltip": "",
+      "value": "79193457515"
+    },
+    {
+      "id": 172,
+      "type": "note",
+      "name": "ЗАПОЛНЯЕТ ПРЕПОДАВАТЕЛЬ 🔔",
+      "tooltip": "ЗАПОЛНЯЕТ ПРЕПОДАВАТЕЛЬ 🔔",
+      "value": "ЗАПОЛНЯЕТ ПРЕПОДАВАТЕЛЬ 🔔"
+    },
+    {
+      "id": 183,
+      "type": "multiple_choice",
+      "name": "Пришел на 1ое занятие?",
+      "tooltip": ""
+    },
+    {
+      "id": 240,
+      "type": "multiple_choice",
+      "name": "Разговор преподавателя после занятия",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 241,
+      "type": "text",
+      "name": "Почему состоялся разговор?",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 240,
+                "condition_type": 5,
+                "value": "3"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 200,
+      "type": "note",
+      "name": "Нам тоже жаль 😥",
+      "tooltip": "Нам тоже жаль 😥",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "2"
+              }
+            ]
+          }
+        ]
+      },
+      "value": "Нам тоже жаль 😥"
+    },
+    {
+      "id": 185,
+      "type": "multiple_choice",
+      "name": "Группа подходит?",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 155,
+      "type": "text",
+      "name": "Какая группа нужна? Напишите подробно",
+      "tooltip": "Какие программы? Расписание?",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 185,
+                "condition_type": 5,
+                "value": "2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 242,
+      "type": "number",
+      "name": "В какую группу пригласили?",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 185,
+                "condition_type": 5,
+                "value": "2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 243,
+      "type": "date",
+      "name": "На какую дату пригласили?",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 185,
+                "condition_type": 5,
+                "value": "2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 197,
+      "type": "date",
+      "name": "Дата 2го занятия",
+      "tooltip": "когда студент придет снова?",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 185,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          },
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 198,
+      "type": "multiple_choice",
+      "name": "Пришел на 2ое занятие?",
+      "tooltip": "",
+      "default_value": "0",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          },
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 185,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 237,
+      "type": "checkmark",
+      "name": "Учебник выдан!",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 183,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "value": "unchecked"
+    },
+    {
+      "id": 247,
+      "type": "checkmark",
+      "name": "Оплата за учебник списана",
+      "tooltip": "",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 237,
+            "condition_type": 3,
+            "value": ""
+          }
+        ]
+      },
+      "value": "unchecked"
+    },
+    {
+      "id": 201,
+      "type": "note",
+      "name": "Ура!!! У вас новый студент! 🥳🥳🥳",
+      "tooltip": "Ура!!! У вас новый студент! 🥳🥳🥳",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 198,
+                "condition_type": 5,
+                "value": "1"
+              }
+            ]
+          }
+        ]
+      },
+      "value": "Ура!!! У вас новый студент! 🥳🥳🥳"
+    },
+    {
+      "id": 199,
+      "type": "text",
+      "name": "Почему не пришел на 2е занятие?",
+      "tooltip": "Напишите подробно + ИСПРАВЬТЕ дату 2го занятия на новую!",
+      "visibility_condition": {
+        "field_id": 0,
+        "condition_type": 11,
+        "value": "",
+        "children": [
+          {
+            "field_id": 0,
+            "condition_type": 10,
+            "value": "",
+            "children": [
+              {
+                "field_id": 198,
+                "condition_type": 5,
+                "value": "2"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 186,
+      "type": "title",
+      "name": "НАПОМИНАНИЕ И КОНТРОЛЬ БПЗ",
+      "tooltip": "",
+      "value": {
+        "checkmark": "unchecked",
+        "fields": [
+          {
+            "id": 245,
+            "type": "checkmark",
+            "name": "Напоминание о ПЗ",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "checked"
+          },
+          {
+            "id": 215,
+            "type": "multiple_choice",
+            "name": "Контроль ПЗ",
+            "tooltip": "",
+            "parent_id": 186
+          },
+          {
+            "id": 216,
+            "type": "text",
+            "name": "Комментарий",
+            "tooltip": "",
+            "parent_id": 186
+          },
+          {
+            "id": 210,
+            "type": "text",
+            "name": "Внес оплату после БПЗ?",
+            "tooltip": "",
+            "parent_id": 186
+          },
+          {
+            "id": 187,
+            "type": "checkmark",
+            "name": "УЧИТСЯ!",
+            "tooltip": "проверено в 1С!",
+            "parent_id": 186,
+            "value": "unchecked"
+          },
+          {
+            "id": 232,
+            "type": "note",
+            "name": "Важно! С 20.09.23 для всех новых студентов создаем связанную форму Общение с клиентом",
+            "tooltip": "Важно! С 20.09.23 для всех новых студентов создаем связанную форму Общение с клиентом",
+            "parent_id": 186,
+            "value": "Важно! С 20.09.23 для всех новых студентов создаем связанную форму Общение с клиентом"
+          },
+          {
+            "id": 233,
+            "type": "checkmark",
+            "name": "Форма Общение с клиентом создана!",
+            "tooltip": "",
+            "parent_id": 186,
+            "visibility_condition": {
+              "field_id": 0,
+              "condition_type": 11,
+              "value": "",
+              "children": [
+                {
+                  "field_id": 187,
+                  "condition_type": 3,
+                  "value": ""
+                }
+              ]
+            },
+            "value": "unchecked"
+          },
+          {
+            "id": 235,
+            "type": "checkmark",
+            "name": "Звонок заботы 1 волна совершен",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "unchecked"
+          },
+          {
+            "id": 236,
+            "type": "checkmark",
+            "name": "Звонок заботы 2 волна совершен",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "unchecked"
+          },
+          {
+            "id": 181,
+            "type": "catalog",
+            "name": "В каком месяце начал учиться (1 платное занятие)",
+            "tooltip": "",
+            "parent_id": 186,
+            "visibility_condition": {
+              "field_id": 0,
+              "condition_type": 11,
+              "value": "",
+              "children": [
+                {
+                  "field_id": 187,
+                  "condition_type": 3,
+                  "value": ""
+                }
+              ]
+            }
+          },
+          {
+            "id": 212,
+            "type": "checkmark",
+            "name": "Первое занятие - платное",
+            "tooltip": "поставьте, если клиент выходит к тому же преподу (см. по формам Выход студентов)",
+            "parent_id": 186,
+            "value": "unchecked"
+          },
+          {
+            "id": 206,
+            "type": "checkmark",
+            "name": "Бонусы начислены",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "checked"
+          },
+          {
+            "id": 214,
+            "type": "checkmark",
+            "name": "Все проверено, можно закрывать:)",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "unchecked"
+          },
+          {
+            "id": 246,
+            "type": "checkmark",
+            "name": "Забран в АМО",
+            "tooltip": "",
+            "parent_id": 186,
+            "value": "unchecked"
+          }
+        ]
+      }
+    },
+    {
+      "id": 188,
+      "type": "text",
+      "name": "Оффер:",
+      "tooltip": "",
+      "value": "3000"
+    },
+    {
+      "id": 207,
+      "type": "text",
+      "name": "Был аванс?",
+      "tooltip": "",
+      "value": "нет"
+    },
+    {
+      "id": 222,
+      "type": "title",
+      "name": "Аналитика",
+      "tooltip": "",
+      "value": {
+        "checkmark": "unchecked",
+        "fields": [
+          {
+            "id": 223,
+            "type": "multiple_choice",
+            "name": "Тип группы",
+            "tooltip": "",
+            "parent_id": 222,
+            "value": {
+              "choice_id": 1,
+              "choice_ids": [
+                1
+              ],
+              "choice_names": [
+                "Группа"
+              ]
+            }
+          },
+          {
+            "id": 224,
+            "type": "multiple_choice",
+            "name": "Категория",
+            "tooltip": "",
+            "parent_id": 222,
+            "value": {
+              "choice_id": 1,
+              "choice_ids": [
+                1
+              ],
+              "choice_names": [
+                "Целевой"
+              ]
+            }
+          },
+          {
+            "id": 225,
+            "type": "multiple_choice",
+            "name": "Старый или новый?",
+            "tooltip": "",
+            "parent_id": 222,
+            "value": {
+              "choice_id": 2,
+              "choice_ids": [
+                2
+              ],
+              "choice_names": [
+                "Новичок / не учился 6 мес"
+              ]
+            }
+          },
+          {
+            "id": 167,
+            "type": "multiple_choice",
+            "name": "Уч.год",
+            "tooltip": "",
+            "default_value": "4",
+            "parent_id": 222,
+            "value": {
+              "choice_id": 4,
+              "choice_ids": [
+                4
+              ],
+              "choice_names": [
+                "2025-26"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": 113,
+      "type": "title",
+      "name": "Старые поля",
+      "tooltip": "",
+      "value": {
+        "checkmark": "unchecked",
+        "fields": [
+          {
+            "id": 211,
+            "type": "multiple_choice",
+            "name": "Не заполнена 9-500",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 196,
+            "type": "text",
+            "name": "Дата и время первого урока",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 192,
+            "type": "text",
+            "name": "Программа ст",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 193,
+            "type": "text",
+            "name": "Курс ст",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 208,
+            "type": "text",
+            "name": "Филиал ст",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 163,
+            "type": "checkmark",
+            "name": "Взять на особый контроль!",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": "unchecked"
+          },
+          {
+            "id": 162,
+            "type": "checkmark",
+            "name": "Потеря пробника",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": "unchecked"
+          },
+          {
+            "id": 147,
+            "type": "multiple_choice",
+            "name": "Учесть в з/п?",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 148,
+            "type": "text",
+            "name": "Комментарий",
+            "tooltip": "Что было не так?",
+            "parent_id": 113
+          },
+          {
+            "id": 75,
+            "type": "text",
+            "name": "Возраст",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 120,
+            "type": "creation_date",
+            "name": "Дата создания",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": "2025-09-22"
+          },
+          {
+            "id": 136,
+            "type": "text",
+            "name": "Комментарий:",
+            "tooltip": "Пишите много!! Вас будут читать коллеги, и им должно быть понятно 🤓",
+            "parent_id": 113
+          },
+          {
+            "id": 176,
+            "type": "date",
+            "name": "Дата след.контакта",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 159,
+            "type": "catalog",
+            "name": "Программа1",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 177,
+            "type": "text",
+            "name": "О чем говорили с родителем после БПЗ?",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 88,
+            "type": "text",
+            "name": "Полное название группы (не заполнять)",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 178,
+            "type": "checkmark",
+            "name": "Повторное БПЗ",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": "unchecked"
+          },
+          {
+            "id": 160,
+            "type": "multiple_choice",
+            "name": "Звонок перед БПЗ?",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 128,
+            "type": "multiple_choice",
+            "name": "Категория клиента",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 168,
+            "type": "multiple_choice",
+            "name": "Оффер",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 93,
+            "type": "time",
+            "name": "Время БПЗ (старое)",
+            "tooltip": "",
+            "parent_id": 113
+          },
+          {
+            "id": 169,
+            "type": "author",
+            "name": "Автор",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": {
+              "id": 875978,
+              "first_name": "Татьяна",
+              "last_name": "Бобровская",
+              "email": "t.bobrovskaya@planetenglish.ru",
+              "type": "user",
+              "department_id": 79183335,
+              "status": "🌍",
+              "avatar_id": 106534,
+              "banned": false,
+              "position": "Администратор",
+              "messenger": {
+                "type": "Internet"
+              },
+              "phone": "2251024"
+            }
+          },
+          {
+            "id": 213,
+            "type": "checkmark",
+            "name": "Контроль сделан",
+            "tooltip": "",
+            "parent_id": 113,
+            "value": "unchecked"
+          }
+        ]
+      }
+    },
+    {
+      "id": 218,
+      "type": "text",
+      "name": "Ответственный из КЦ",
+      "tooltip": ""
+    },
+    {
+      "id": 4,
+      "type": "multiple_choice",
+      "name": "Статус",
+      "tooltip": "",
+      "default_value": "10",
+      "code": "Status",
+      "value": {
+        "choice_id": 10,
+        "choice_ids": [
+          10
+        ],
+        "choice_names": [
+          "Новая заявка"
+        ]
+      }
+    }
+  ]
+}

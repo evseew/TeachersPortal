@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/pyrus-sync",
+      "schedule": "0 * * * *"
+    }
+  ]
+}

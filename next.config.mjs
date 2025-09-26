@@ -17,6 +17,12 @@ const nextConfig = {
   // Enable additional optimizations
   poweredByHeader: false,
   reactStrictMode: true,
+  
+  // Настройки для надёжной работы с внешними ресурсами
+  images: {
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
 }
 
 export default nextConfig
