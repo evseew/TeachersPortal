@@ -20,7 +20,8 @@ interface ExtendedTeacherRow extends TeacherLeaderboardRow {
   trial_total?: number
   trial_converted?: number
 }
-import selectionRules from "../rules/selection-rules.json"
+import { TEACHER_GROUPS_CONFIG, getGroupRanges, determineTeacherGroup } from "@/lib/config/september-forms-config"
+import type { SeptemberTeacherStats, TeacherGroupType, TeacherGroupRangeConfig as GroupRangeType } from "@/lib/types/september-rating"
 
 /**
  * Компонент рейтинга преподавателей для плагина September Rating
@@ -68,26 +69,18 @@ function getCategoryColor(category: string) {
 }
 
 // Определяем группу по количеству студентов
-function getTeacherGroup(teacher: ExtendedTeacherRow, groupType: 'oldies' | 'trial'): string {
-  if (groupType === 'oldies') {
-    const studentCount = Number(teacher.last_year_base || 0)
-    if (studentCount >= 35) return '35+'
-    if (studentCount >= 16) return '16-34'
-    if (studentCount >= 6) return '6-15'
-    return 'under-6'
-  } else {
-    const trialCount = Number(teacher.trial_total || 0)
-    if (trialCount >= 16) return '16+'
-    if (trialCount >= 11) return '11-15'
-    if (trialCount >= 5) return '5-10'
-    return 'under-5'
-  }
+function getTeacherGroup(teacher: ExtendedTeacherRow, groupType: TeacherGroupType): string {
+  const studentCount = groupType === 'oldies' 
+    ? Number(teacher.last_year_base || 0)
+    : Number(teacher.trial_total || 0)
+    
+  return determineTeacherGroup(studentCount, groupType)
 }
 
-// Получаем данные группы из правил
-function getGroupData(groupType: 'oldies' | 'trial', groupRange: string) {
-  const groups = selectionRules.teacher_groups[groupType].groups as any
-  return groups[groupRange] || null
+// Получаем данные группы из конфига
+function getGroupData(groupType: TeacherGroupType, groupRange: string): GroupRangeType | null {
+  const ranges = getGroupRanges(groupType)
+  return ranges.find(range => range.key === groupRange) || null
 }
 
 interface TeacherLeaderboardProps {
@@ -140,7 +133,7 @@ export function TeacherLeaderboard({ showOnlyCards = false }: TeacherLeaderboard
   const source = rows ?? []
 
   // Группируем преподавателей по типу (oldies/trial) и группе
-  const groupedTeachers = (groupType: 'oldies' | 'trial') => {
+  const groupedTeachers = (groupType: TeacherGroupType) => {
     const filtered = source
       .filter((teacher) => {
         const matchesSearch = teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -470,7 +463,7 @@ export function TeacherLeaderboard({ showOnlyCards = false }: TeacherLeaderboard
                               <td className="py-4 px-4">
                                 <div className="flex items-center space-x-2">
                                   <span className="font-bold text-lg">#{startIndex + index + 1}</span>
-                                  {startIndex + index < (groupData.winners_count || 0) && (
+                                  {startIndex + index < (groupData?.winnersCount || 0) && (
                                     <Trophy className="h-4 w-4 text-yellow-500" />
                                   )}
                                 </div>
@@ -603,7 +596,7 @@ export function TeacherLeaderboard({ showOnlyCards = false }: TeacherLeaderboard
                               <td className="py-4 px-4">
                                 <div className="flex items-center space-x-2">
                                   <span className="font-bold text-lg">#{startIndex + index + 1}</span>
-                                  {startIndex + index < (groupData.winners_count || 0) && (
+                                  {startIndex + index < (groupData?.winnersCount || 0) && (
                                     <Trophy className="h-4 w-4 text-yellow-500" />
                                   )}
                                 </div>

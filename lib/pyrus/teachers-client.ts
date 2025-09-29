@@ -1,15 +1,14 @@
 /**
  * Клиент для работы с данными преподавателей из форм Pyrus
  * 
- * Основные возможности:
- * - Извлечение имен преподавателей из справочников
- * - Извлечение названий филиалов с нормализацией
- * - Проверка статусов PE и отметок "учится"
- * - Валидация данных форм
+ * ОБНОВЛЕНО: Использует новую надежную архитектуру
+ * Основана на проверенной логике из final_fixed_report.md
  */
 
 import { PyrusBaseClient } from './base-client'
 import { PyrusField } from './forms-client'
+import { PyrusFieldExtractor, pyrusFieldExtractor } from './core/field-extractor'
+import { pyrusDebugLogger } from './core/debug-logger'
 
 export interface TeacherData {
   name: string
@@ -26,51 +25,19 @@ export interface BranchData {
 }
 
 export class PyrusTeachersClient extends PyrusBaseClient {
+  private fieldExtractor: PyrusFieldExtractor
+
+  constructor() {
+    super()
+    this.fieldExtractor = pyrusFieldExtractor
+  }
 
   /**
-   * Извлекает ФИО преподавателя из поля справочника
-   * ИСПРАВЛЕНО: правильная обработка person-полей Pyrus
+   * НОВЫЙ: Извлечение ФИО преподавателя через надежный экстрактор
+   * Использует проверенную логику из Python
    */
   extractTeacherName(taskFields: PyrusField[], fieldId: number): string {
-    const value = this.getFieldValue(taskFields, fieldId)
-    
-    if (!value) {
-      return "Неизвестный преподаватель"
-    }
-
-    // Строковое значение
-    if (typeof value === 'string' && value.trim()) {
-      return value.trim()
-    }
-
-    // Обработка объекта с данными преподавателя
-    if (typeof value === 'object') {
-      // Поддержка person-объекта: first_name/last_name (основной формат)
-      if (value.first_name || value.last_name) {
-        const firstName = (value.first_name || '').toString().trim()
-        const lastName = (value.last_name || '').toString().trim()
-        const fullName = `${firstName} ${lastName}`.trim()
-        if (fullName && fullName !== '') {
-          return fullName
-        }
-      }
-      
-      // Для справочника сотрудников проверяем различные поля
-      const possibleFields = ['text', 'name', 'value', 'display_name', 'full_name']
-      for (const fieldName of possibleFields) {
-        const nameValue = value[fieldName]
-        if (typeof nameValue === 'string' && nameValue.trim()) {
-          return nameValue.trim()
-        }
-      }
-
-      // Проверяем вложенные объекты
-      if (value.person) {
-        return this.extractTeacherName([{ id: fieldId, type: 'person', value: value.person }], fieldId)
-      }
-    }
-    
-    return "Неизвестный преподаватель"
+    return this.fieldExtractor.extractTeacherName(taskFields, fieldId)
   }
 
   /**

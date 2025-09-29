@@ -7,6 +7,7 @@
 
 import { PyrusFormsClient } from './forms-client'
 import { PyrusTeachersClient } from './teachers-client'
+import { PyrusTeachersClientV2 } from './teachers-client-v2'
 import { PyrusUsersClient } from './client' // Существующий клиент
 
 export interface ClientFactoryOptions {
@@ -18,6 +19,7 @@ export interface ClientFactoryOptions {
 export class PyrusClientFactory {
   private static formsClientInstance: PyrusFormsClient | null = null
   private static teachersClientInstance: PyrusTeachersClient | null = null
+  private static teachersClientV2Instance: PyrusTeachersClientV2 | null = null
   private static usersClientInstance: PyrusUsersClient | null = null
   
   private static options: ClientFactoryOptions = {
@@ -51,7 +53,26 @@ export class PyrusClientFactory {
   }
 
   /**
-   * Создает или возвращает кэшированный экземпляр клиента преподавателей
+   * Создает или возвращает кэшированный экземпляр клиента преподавателей V2
+   * РЕКОМЕНДУЕТСЯ для новых интеграций
+   */
+  static createTeachersClientV2(): PyrusTeachersClientV2 {
+    if (this.options.enableCaching && this.teachersClientV2Instance) {
+      return this.teachersClientV2Instance
+    }
+
+    const client = new PyrusTeachersClientV2()
+    
+    if (this.options.enableCaching) {
+      this.teachersClientV2Instance = client
+    }
+
+    return client
+  }
+
+  /**
+   * Создает или возвращает кэшированный экземпляр клиента преподавателей (старая версия)
+   * УСТАРЕЛО: используйте createTeachersClientV2()
    */
   static createTeachersClient(): PyrusTeachersClient {
     if (this.options.enableCaching && this.teachersClientInstance) {

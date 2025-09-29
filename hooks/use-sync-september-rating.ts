@@ -1,42 +1,21 @@
 "use client"
 
 import { useState } from 'react'
-
-export interface SyncResult {
-  success: boolean
-  duration?: string
-  result?: {
-    recordsProcessed: number
-    recordsUpdated: number
-    errors: string[]
-    warnings: string[]
-    startedAt: string
-    completedAt: string
-  }
-  error?: string
-  initiatedBy?: string
-  timestamp: string
-}
-
-export interface SyncStatus {
-  success: boolean
-  status?: {
-    lastSuccessfulSync?: string
-    lastAttempt?: string
-    lastResult: 'success' | 'error' | 'partial'
-    isRunning: boolean
-    nextScheduledSync?: string
-  }
-  timestamp: string
-}
+import type { 
+  SyncResult, 
+  DetailedSyncStatus, 
+  SyncProgressStep,
+  UseSyncSeptemberRatingResult 
+} from '@/lib/types/september-rating'
 
 /**
  * Хук для управления синхронизацией September Rating с Pyrus
  */
-export function useSyncSeptemberRating() {
+export function useSyncSeptemberRating(): UseSyncSeptemberRatingResult {
   const [isLoading, setIsLoading] = useState(false)
   const [lastResult, setLastResult] = useState<SyncResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState<SyncProgressStep | null>(null)
 
   /**
    * Запуск ручной синхронизации
@@ -69,8 +48,10 @@ export function useSyncSeptemberRating() {
       
       const errorResult: SyncResult = {
         success: false,
-        error: errorMessage,
-        timestamp: new Date().toISOString()
+        recordsProcessed: 0,
+        recordsUpdated: 0,
+        startedAt: new Date(),
+        errors: [errorMessage]
       }
       
       setLastResult(errorResult)
@@ -84,7 +65,7 @@ export function useSyncSeptemberRating() {
   /**
    * Получение статуса синхронизации
    */
-  const getStatus = async (): Promise<SyncStatus> => {
+  const getStatus = async (): Promise<DetailedSyncStatus> => {
     try {
       const response = await fetch('/api/plugins/september-rating/sync', {
         method: 'GET',
@@ -94,7 +75,7 @@ export function useSyncSeptemberRating() {
         credentials: 'include',
       })
 
-      const status: SyncStatus = await response.json()
+      const status = await response.json() as DetailedSyncStatus
 
       if (!response.ok) {
         throw new Error(status.error || `HTTP ${response.status}`)
@@ -106,9 +87,12 @@ export function useSyncSeptemberRating() {
       const errorMessage = err instanceof Error ? err.message : 'Failed to get status'
       
       return {
-        success: false,
-        error: errorMessage,
-        timestamp: new Date().toISOString()
+        formsStatus: {
+          oldies: { recordCount: 0, errors: [errorMessage], warnings: [], status: 'error' },
+          trial: { recordCount: 0, errors: [errorMessage], warnings: [], status: 'error' }
+        },
+        dataFreshness: { oldies: 'outdated', trial: 'outdated' },
+        isRunning: false
       }
     }
   }
@@ -120,12 +104,23 @@ export function useSyncSeptemberRating() {
     setError(null)
   }
 
+  /**
+   * Отмена текущей синхронизации
+   */
+  const cancelSync = async (): Promise<void> => {
+    // TODO: Реализовать отмену синхронизации
+    setIsLoading(false)
+    setProgress(null)
+  }
+
   return {
     isLoading,
     lastResult,
     error,
+    progress,
     startSync,
     getStatus,
-    clearError
+    clearError,
+    cancelSync
   }
 }

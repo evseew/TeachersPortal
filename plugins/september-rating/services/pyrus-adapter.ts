@@ -1,6 +1,9 @@
-import { PyrusSyncService } from "@/lib/services/pyrus-sync.service"
+import { PyrusSyncService, TeacherMetrics } from "@/lib/services/pyrus-sync.service"
 import { PyrusClientFactory } from "@/lib/pyrus/client-factory"
+import { SeptemberRatingSyncStatusService } from "@/lib/services/september-rating-sync-status"
 import type { SyncResult, SyncablePlugin } from "../../core/plugin-types"
+import type { SeptemberTeacherStats, DetailedSyncStatus, TeacherGroupType } from "@/lib/types/september-rating"
+import { SEPTEMBER_FORMS, determineTeacherGroup, isTeacherExcluded } from "@/lib/config/september-forms-config"
 import selectionRules from "../rules/selection-rules.json"
 
 /**
@@ -11,17 +14,19 @@ import selectionRules from "../rules/selection-rules.json"
  */
 export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
   private syncService: PyrusSyncService
+  private statusService: SeptemberRatingSyncStatusService
 
   constructor() {
     const formsClient = PyrusClientFactory.createFormsClient()
     const teachersClient = PyrusClientFactory.createTeachersClient()
     this.syncService = new PyrusSyncService(formsClient, teachersClient)
+    this.statusService = new SeptemberRatingSyncStatusService()
   }
 
   /**
    * Получить правила выборки из JSON конфигурации
    */
-  private getRules() {
+  private getRules(): typeof selectionRules {
     return selectionRules
   }
 
@@ -97,6 +102,13 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
         warnings: warnings.length > 0 ? warnings : undefined
       }
 
+      // Сохраняем результат в базу данных
+      try {
+        await this.statusService.saveSyncResult(result)
+      } catch (dbError) {
+        console.warn('⚠️ Failed to save sync result to database:', dbError)
+      }
+
       console.log(`${success ? '✅' : '❌'} September Rating sync completed:`, {
         success,
         recordsProcessed,
@@ -128,15 +140,8 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
   /**
    * Получить статус последней синхронизации
    */
-  async getSyncStatus() {
-    // TODO: Реализовать получение статуса из базы данных или кэша
-    return {
-      lastSuccessfulSync: undefined,
-      lastAttempt: undefined,
-      lastResult: 'success' as const,
-      isRunning: false,
-      nextScheduledSync: undefined
-    }
+  async getSyncStatus(): Promise<DetailedSyncStatus> {
+    return await this.statusService.getDetailedSyncStatus()
   }
 
   /**
@@ -144,7 +149,7 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
    * 
    * Применяет правила выборки и исключения из JSON конфигурации
    */
-  private mapPyrusDataToMetrics(data: any[]): any[] {
+  private mapPyrusDataToMetrics(data: TeacherMetrics[]): TeacherMetrics[] {
     const rules = this.getRules()
     
     return data
@@ -162,7 +167,7 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
         const statusFilter = rules.forms.form_2304918.filters
           .find(f => f.field === 'status_pe' && f.condition === 'включить')?.values || []
         
-        if (statusFilter.length > 0 && !statusFilter.includes(item.status_pe)) {
+        if (statusFilter.length > 0 && !statusFilter.includes('status_pe' in item ? String(item.status_pe) : '')) {
           return false
         }
         
@@ -179,14 +184,12 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
   /**
    * Обработка исключений преподавателей
    */
-  private handleExclusions(data: any[], formType: 'oldies' | 'trial'): any[] {
+  private handleExclusions(data: TeacherMetrics[], formType: TeacherGroupType): TeacherMetrics[] {
     const rules = this.getRules()
     const exclusions = rules.teacher_exclusions[formType]?.teachers || []
     
     return data.filter(item => {
-      const isExcluded = exclusions.some(excludedName => 
-        item.teacher_name?.includes(excludedName)
-      )
+      const isExcluded = isTeacherExcluded(item.teacher_name, formType)
       
       if (isExcluded) {
         console.log(`🚫 Excluding teacher ${item.teacher_name} from ${formType} rating`)
@@ -199,7 +202,7 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
   /**
    * Расчет балла преподавателя
    */
-  private calculateScore(item: any): number {
+  private calculateScore(item: TeacherMetrics): number {
     // Реализация расчета по формулам из правил
     const returnPercent = (item.last_year_returned || 0) / Math.max(item.last_year_base || 1, 1) * 100
     const conversionPercent = (item.trial_converted || 0) / Math.max(item.trial_total || 1, 1) * 100
@@ -210,19 +213,19 @@ export class SeptemberRatingPyrusAdapter implements SyncablePlugin {
   /**
    * Определение группы преподавателя
    */
-  private determineTeacherGroup(item: any): string {
+  private determineTeacherGroup(item: TeacherMetrics): string {
     const oldiesCount = Number(item.last_year_base || 0)
     const trialCount = Number(item.trial_total || 0)
     
-    // Группировка для старичков
-    if (oldiesCount >= 35) return 'oldies-35+'
-    if (oldiesCount >= 16) return 'oldies-16-34'
-    if (oldiesCount >= 6) return 'oldies-6-15'
+    // Определяем группу для старичков
+    if (oldiesCount > 0) {
+      return `oldies-${determineTeacherGroup(oldiesCount, 'oldies')}`
+    }
     
-    // Группировка для trial
-    if (trialCount >= 16) return 'trial-16+'
-    if (trialCount >= 11) return 'trial-11-15'
-    if (trialCount >= 5) return 'trial-5-10'
+    // Определяем группу для trial
+    if (trialCount > 0) {
+      return `trial-${determineTeacherGroup(trialCount, 'trial')}`
+    }
     
     return 'other'
   }

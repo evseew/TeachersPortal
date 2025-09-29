@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth/config'
 import { hasAccess } from '@/lib/auth/permissions'
-import { SeptemberRatingPyrusAdapter } from '@/plugins/september-rating/services/pyrus-adapter'
+import { SeptemberRatingPyrusAdapterV2 } from '@/plugins/september-rating/services/pyrus-adapter-v2'
 
 /**
  * API endpoint для ручного запуска синхронизации плагина September Rating
@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     
     console.log(`[MANUAL-SYNC] September Rating sync initiated by ${session.user.email}`)
     
-    // Создание адаптера и запуск синхронизации
-    const adapter = new SeptemberRatingPyrusAdapter()
+    // Создание НОВОГО адаптера и запуск синхронизации
+    const adapter = new SeptemberRatingPyrusAdapterV2()
     const result = await adapter.sync()
     
     const duration = Date.now() - startTime
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
       )
     }
     
-    const adapter = new SeptemberRatingPyrusAdapter()
+    const adapter = new SeptemberRatingPyrusAdapterV2()
     const status = await adapter.getSyncStatus()
     
     return NextResponse.json({
