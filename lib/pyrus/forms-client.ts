@@ -1,8 +1,12 @@
 /**
  * Клиент для работы с формами Pyrus API v4
  * 
- * Использует курсорную пагинацию по официальной документации Pyrus API.
- * @see PYRUS_API_INTEGRATION_GUIDE.md
+ * Использует keyset пагинацию по официальной документации Pyrus API:
+ * https://pyrus.com/en/help/api
+ * 
+ * Keyset pagination через параметры:
+ * - task_id<{last_id} - фильтрация задач с ID меньше указанного
+ * - sort=id - сортировка по ID (по убыванию)
  */
 
 import { PyrusBaseClient, PyrusRequestOptions } from './base-client'
@@ -26,8 +30,8 @@ export interface PyrusField {
   [key: string]: any
 }
 
-// Примечание: PyrusTasksResponse теперь определен в pagination-handler.ts
-// и использует курсорную пагинацию (next_cursor вместо next_task_id)
+// Примечание: PyrusTasksResponse определен в pagination-handler.ts
+// Pyrus API не возвращает метаданные пагинации, используется keyset pagination через ID
 
 export interface FormsIteratorOptions {
   includeArchived?: boolean
@@ -47,9 +51,13 @@ export class PyrusFormsClient extends PyrusBaseClient {
   }
   
   /**
-   * Итератор по задачам формы с курсорной пагинацией
-   * Использует официальную документацию Pyrus API v4
-   * @see PYRUS_API_INTEGRATION_GUIDE.md
+   * Итератор по задачам формы с keyset пагинацией
+   * 
+   * Использует keyset pagination через параметры:
+   * - task_id<{last_id} - фильтрация задач с ID меньше указанного
+   * - sort=id - сортировка по ID (по убыванию)
+   * 
+   * @see https://pyrus.com/en/help/api
    */
   async *iterRegisterTasks(
     formId: number, 
@@ -63,7 +71,7 @@ export class PyrusFormsClient extends PyrusBaseClient {
       logProgress: true
     }
 
-    // Используем курсорный пагинатор
+    // Используем keyset пагинатор
     for await (const task of this.paginationHandler.iterateAllTasks(formId, paginationOptions)) {
       yield task
     }

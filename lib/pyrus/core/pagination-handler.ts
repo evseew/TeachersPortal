@@ -1,11 +1,19 @@
 /**
- * Курсорная пагинация для форм Pyrus API v4
+ * Keyset пагинация для форм Pyrus API v4
  * 
  * Реализация по официальной документации Pyrus API:
- * @see PYRUS_API_INTEGRATION_GUIDE.md
+ * https://pyrus.com/en/help/api
  * 
- * Использует параметр `cursor` и поле `next_cursor` для надежной пагинации.
- * Гарантирует отсутствие дубликатов и потери данных при больших объемах.
+ * Использует keyset pagination через параметры:
+ * - `task_id<{last_task_id}` - фильтр задач с ID меньше указанного
+ * - `sort=id` - сортировка по ID (по убыванию)
+ * - `item_count` - количество задач на страницу (до 20000)
+ * 
+ * Остановка: когда вернулось задач меньше, чем запрошено в item_count.
+ * 
+ * Лимиты:
+ * - До 20000 задач за один запрос
+ * - До 5000 запросов за 10 минут
  */
 
 import { PyrusBaseClient } from '../base-client'
@@ -21,7 +29,8 @@ export interface PaginationOptions {
 
 interface PyrusTasksResponse {
   tasks: PyrusTask[]
-  next_cursor?: string  // Курсор для следующей страницы (официальный API v4)
+  // Примечание: Pyrus API не возвращает метаданные пагинации
+  // Используется keyset pagination через ID задач
 }
 
 export class PyrusPaginationHandler {
@@ -32,9 +41,9 @@ export class PyrusPaginationHandler {
   }
 
   /**
-   * Итератор по задачам формы с КУРСОРНОЙ пагинацией
+   * Итератор по задачам формы с KEYSET пагинацией
    * Реализация по официальной документации Pyrus API v4
-   * @see PYRUS_API_INTEGRATION_GUIDE.md
+   * https://pyrus.com/en/help/api
    */
   async *iterateAllTasks(
     formId: number,
@@ -43,19 +52,19 @@ export class PyrusPaginationHandler {
     const {
       includeArchived = false,
       maxTasks = Infinity,
-      batchSize = 200, // По умолчанию в Pyrus API
+      batchSize = 200, // Можно до 20000, но начнём с 200
       logProgress = true
     } = options
 
     let processedTasks = 0
     let pageNumber = 0
-    let cursor: string | null = null // Курсор для следующей страницы
+    let lastTaskId: number | null = null // ID последней задачи для keyset пагинации
     
     // Отслеживание обработанных ID для защиты от дубликатов
     const seenTaskIds = new Set<number>()
 
     if (logProgress) {
-      console.log(`📄 PyrusPaginationHandler: начинаем курсорную пагинацию формы ${formId}`)
+      console.log(`📄 PyrusPaginationHandler: начинаем keyset пагинацию формы ${formId}`)
       pyrusDebugLogger.incrementGlobal(`form_${formId}_iterations_started`)
     }
 
@@ -64,21 +73,24 @@ export class PyrusPaginationHandler {
       pageNumber++
       
       try {
-        // Формируем параметры запроса по документации Pyrus API v4
+        // Формируем базовые параметры запроса
         const params = new URLSearchParams({
           item_count: Math.min(batchSize, maxTasks - processedTasks).toString(),
-          include_archived: includeArchived ? 'y' : 'n'
+          include_archived: includeArchived ? 'y' : 'n',
+          sort: 'id' // Сортировка по ID (по убыванию)
         })
 
-        // Добавляем курсор, если это не первая страница
-        if (cursor) {
-          params.append('cursor', cursor)
+        // Формируем endpoint с keyset фильтром
+        // Примечание: символ < нужно URL-encode в %3C
+        let endpoint = `forms/${formId}/register?${params.toString()}`
+        
+        if (lastTaskId !== null) {
+          endpoint += `&task_id%3C${lastTaskId}` // task_id< (< закодирован как %3C)
         }
-
-        const endpoint = `forms/${formId}/register?${params.toString()}`
         
         if (logProgress) {
-          console.log(`📄 Страница ${pageNumber}: запрос к ${endpoint.substring(0, 100)}${cursor ? '...' : ''}`)
+          const idFilter = lastTaskId !== null ? ` (id < ${lastTaskId})` : ' (без фильтра)'
+          console.log(`📄 Страница ${pageNumber}${idFilter}`)
         }
         
         // Выполняем запрос с увеличенным timeout (60 сек для больших страниц)
@@ -91,11 +103,11 @@ export class PyrusPaginationHandler {
           break
         }
 
-        const { tasks = [], next_cursor } = response
+        const { tasks = [] } = response
         const tasksReceived = tasks.length
 
         if (logProgress) {
-          console.log(`  ✅ Получено ${tasksReceived} задач, next_cursor: ${next_cursor ? 'есть' : 'нет'}`)
+          console.log(`  ✅ Получено ${tasksReceived} задач`)
         }
 
         // КРИТИЧЕСКАЯ ПРОВЕРКА: если задач нет, останавливаемся
@@ -104,6 +116,12 @@ export class PyrusPaginationHandler {
             console.log(`🏁 PyrusPaginationHandler: получен пустой ответ, завершаем`)
           }
           break
+        }
+
+        // Запоминаем ID последней задачи на странице для следующего запроса
+        // КРИТИЧЕСКИ ВАЖНО: обновляем ПЕРЕД циклом, используя последнюю задачу со страницы
+        if (tasks.length > 0) {
+          lastTaskId = tasks[tasks.length - 1].id
         }
 
         // Отдаем задачи по одной
@@ -128,17 +146,13 @@ export class PyrusPaginationHandler {
           pyrusDebugLogger.incrementGlobal(`form_${formId}_tasks_yielded`)
         }
 
-        // КУРСОРНАЯ ПАГИНАЦИЯ: проверяем наличие next_cursor
-        if (!next_cursor) {
-          // Курсора нет - это была последняя страница
+        // KEYSET ПАГИНАЦИЯ: останавливаемся, если получили меньше, чем запрашивали
+        if (tasksReceived < batchSize) {
           if (logProgress) {
-            console.log(`🏁 PyrusPaginationHandler: next_cursor отсутствует, данные закончились`)
+            console.log(`🏁 PyrusPaginationHandler: получено ${tasksReceived} < ${batchSize}, данные закончились`)
           }
           break
         }
-        
-        // Устанавливаем курсор для следующей страницы
-        cursor = next_cursor
         
         // Проверяем лимит обработанных задач
         if (processedTasks >= maxTasks) {
@@ -167,10 +181,10 @@ export class PyrusPaginationHandler {
     }
 
     if (logProgress) {
-      console.log(`\n🏁 PyrusPaginationHandler: курсорная пагинация завершена`)
+      console.log(`\n🏁 PyrusPaginationHandler: keyset пагинация завершена`)
       console.log(`  📊 Всего страниц: ${pageNumber}`)
       console.log(`  📋 Всего обработано задач: ${processedTasks}`)
-      console.log(`  🔍 Дубликатов пропущено: ${seenTaskIds.size - processedTasks}`)
+      console.log(`  🔍 Уникальных задач: ${seenTaskIds.size}`)
       pyrusDebugLogger.incrementGlobal(`form_${formId}_total_processed`, processedTasks)
     }
   }
