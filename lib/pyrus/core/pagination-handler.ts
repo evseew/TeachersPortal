@@ -1,6 +1,11 @@
 /**
- * Правильная пагинация для форм Pyrus
- * Основана на проверенной логике из final_fixed_report.md
+ * Курсорная пагинация для форм Pyrus API v4
+ * 
+ * Реализация по официальной документации Pyrus API:
+ * @see PYRUS_API_INTEGRATION_GUIDE.md
+ * 
+ * Использует параметр `cursor` и поле `next_cursor` для надежной пагинации.
+ * Гарантирует отсутствие дубликатов и потери данных при больших объемах.
  */
 
 import { PyrusBaseClient } from '../base-client'
@@ -16,8 +21,7 @@ export interface PaginationOptions {
 
 interface PyrusTasksResponse {
   tasks: PyrusTask[]
-  has_more: boolean
-  next_task_id?: number
+  next_cursor?: string  // Курсор для следующей страницы (официальный API v4)
 }
 
 export class PyrusPaginationHandler {
@@ -28,8 +32,9 @@ export class PyrusPaginationHandler {
   }
 
   /**
-   * Итератор по задачам формы с правильной пагинацией
-   * ТОЧНАЯ КОПИЯ логики из Python iter_register_tasks
+   * Итератор по задачам формы с КУРСОРНОЙ пагинацией
+   * Реализация по официальной документации Pyrus API v4
+   * @see PYRUS_API_INTEGRATION_GUIDE.md
    */
   async *iterateAllTasks(
     formId: number,
@@ -38,58 +43,65 @@ export class PyrusPaginationHandler {
     const {
       includeArchived = false,
       maxTasks = Infinity,
-      batchSize = 200, // Как в Python
+      batchSize = 200, // По умолчанию в Pyrus API
       logProgress = true
     } = options
 
     let processedTasks = 0
-    let nextTaskId: number | undefined = undefined
-    let hasMore = true
+    let pageNumber = 0
+    let cursor: string | null = null // Курсор для следующей страницы
+    
+    // Отслеживание обработанных ID для защиты от дубликатов
+    const seenTaskIds = new Set<number>()
 
     if (logProgress) {
-      console.log(`PyrusPaginationHandler: начинаем итерацию по форме ${formId}`)
+      console.log(`📄 PyrusPaginationHandler: начинаем курсорную пагинацию формы ${formId}`)
       pyrusDebugLogger.incrementGlobal(`form_${formId}_iterations_started`)
     }
 
-    while (hasMore && processedTasks < maxTasks) {
+    // Цикл по страницам
+    while (processedTasks < maxTasks) {
+      pageNumber++
+      
       try {
-        // Строим параметры запроса ТОЧНО как в Python
+        // Формируем параметры запроса по документации Pyrus API v4
         const params = new URLSearchParams({
           item_count: Math.min(batchSize, maxTasks - processedTasks).toString(),
           include_archived: includeArchived ? 'y' : 'n'
         })
 
-        // КРИТИЧЕСКИ ВАЖНО: используем max_task_id для пагинации (как в Python)
-        if (nextTaskId !== undefined) {
-          params.append('max_task_id', nextTaskId.toString())
+        // Добавляем курсор, если это не первая страница
+        if (cursor) {
+          params.append('cursor', cursor)
         }
 
         const endpoint = `forms/${formId}/register?${params.toString()}`
         
         if (logProgress) {
-          console.log(`PyrusPaginationHandler: запрос к ${endpoint}`)
+          console.log(`📄 Страница ${pageNumber}: запрос к ${endpoint.substring(0, 100)}${cursor ? '...' : ''}`)
         }
         
-        // Выполняем запрос с увеличенным timeout
+        // Выполняем запрос с увеличенным timeout (60 сек для больших страниц)
         const response = await this.client.get<PyrusTasksResponse>(endpoint, {
           timeout: 60000
         })
 
         if (!response) {
-          console.error(`PyrusPaginationHandler: не удалось получить данные для формы ${formId}`)
+          console.error(`❌ PyrusPaginationHandler: не удалось получить данные для формы ${formId}`)
           break
         }
 
-        const { tasks = [], has_more = false, next_task_id } = response
+        const { tasks = [], next_cursor } = response
+        const tasksReceived = tasks.length
 
         if (logProgress) {
-          console.log(`PyrusPaginationHandler: получено ${tasks.length} задач, has_more: ${has_more}, next_task_id: ${next_task_id}`)
+          console.log(`  ✅ Получено ${tasksReceived} задач, next_cursor: ${next_cursor ? 'есть' : 'нет'}`)
         }
 
         // КРИТИЧЕСКАЯ ПРОВЕРКА: если задач нет, останавливаемся
-        if (tasks.length === 0) {
+        if (tasksReceived === 0) {
           if (logProgress) {
-            console.log(`PyrusPaginationHandler: получен пустой ответ для формы ${formId}`)
+            console.log(`🏁 PyrusPaginationHandler: получен пустой ответ, завершаем`)
           }
           break
         }
@@ -99,55 +111,66 @@ export class PyrusPaginationHandler {
           if (processedTasks >= maxTasks) {
             break
           }
-
+          
+          // Проверка на дубликат
+          if (seenTaskIds.has(task.id)) {
+            if (logProgress) {
+              console.warn(`⚠️  PyrusPaginationHandler: пропуск дубликата task_id=${task.id}`)
+            }
+            pyrusDebugLogger.incrementGlobal(`form_${formId}_duplicates_skipped`)
+            continue
+          }
+          
+          seenTaskIds.add(task.id)
           yield task
           processedTasks++
           
           pyrusDebugLogger.incrementGlobal(`form_${formId}_tasks_yielded`)
         }
 
-        // ПРАВИЛЬНАЯ ЛОГИКА ПАГИНАЦИИ (как в Python):
-        // Продолжаем только если:
-        // 1. API предоставляет next_task_id 
-        // 2. Получили полную пачку задач
-        // 3. Не достигли лимита
-        if (next_task_id !== undefined && next_task_id !== null) {
-          nextTaskId = next_task_id
-          hasMore = tasks.length === batchSize && processedTasks < maxTasks
-          
+        // КУРСОРНАЯ ПАГИНАЦИЯ: проверяем наличие next_cursor
+        if (!next_cursor) {
+          // Курсора нет - это была последняя страница
           if (logProgress) {
-            console.log(`PyrusPaginationHandler: продолжаем с next_task_id=${next_task_id}, hasMore=${hasMore}`)
+            console.log(`🏁 PyrusPaginationHandler: next_cursor отсутствует, данные закончились`)
           }
-        } else {
-          // Если API не предоставляет next_task_id, останавливаемся
+          break
+        }
+        
+        // Устанавливаем курсор для следующей страницы
+        cursor = next_cursor
+        
+        // Проверяем лимит обработанных задач
+        if (processedTasks >= maxTasks) {
           if (logProgress) {
-            console.log(`PyrusPaginationHandler: API не предоставляет next_task_id, завершаем итерацию`)
+            console.log(`🏁 PyrusPaginationHandler: достигнут лимит maxTasks=${maxTasks}, завершаем`)
           }
-          hasMore = false
+          break
         }
 
         // Логирование прогресса каждые 500 задач
-        if (logProgress && (processedTasks % 500 === 0 || !hasMore)) {
-          console.log(`PyrusPaginationHandler: обработано ${processedTasks} задач формы ${formId}`)
+        if (logProgress && processedTasks % 500 === 0) {
+          console.log(`📊 PyrusPaginationHandler: обработано ${processedTasks} задач формы ${formId}`)
         }
 
-        // Небольшая задержка между запросами для снижения нагрузки на API
-        if (hasMore) {
-          await new Promise(resolve => setTimeout(resolve, 100))
-        }
+        // Небольшая задержка между запросами (защита от rate limiting)
+        await new Promise(resolve => setTimeout(resolve, 100))
 
       } catch (error) {
-        console.error(`PyrusPaginationHandler: ошибка при получении задач формы ${formId}:`, error)
+        console.error(`❌ PyrusPaginationHandler: ошибка на странице ${pageNumber} формы ${formId}:`, error)
         pyrusDebugLogger.incrementGlobal(`form_${formId}_pagination_errors`)
         
-        // Пытаемся продолжить с задержкой
+        // При ошибке пытаемся продолжить после задержки
         await new Promise(resolve => setTimeout(resolve, 5000))
         continue
       }
     }
 
     if (logProgress) {
-      console.log(`PyrusPaginationHandler: итерация завершена. Всего обработано ${processedTasks} задач формы ${formId}`)
+      console.log(`\n🏁 PyrusPaginationHandler: курсорная пагинация завершена`)
+      console.log(`  📊 Всего страниц: ${pageNumber}`)
+      console.log(`  📋 Всего обработано задач: ${processedTasks}`)
+      console.log(`  🔍 Дубликатов пропущено: ${seenTaskIds.size - processedTasks}`)
       pyrusDebugLogger.incrementGlobal(`form_${formId}_total_processed`, processedTasks)
     }
   }

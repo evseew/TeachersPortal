@@ -167,9 +167,12 @@ export class PyrusSyncServiceV2 {
     let excludedCount = 0
     let taskCount = 0
     let filteredCount = 0
+    let invalidPECount = 0
+    let extractionErrorsCount = 0
     
     // КРИТИЧЕСКИ ВАЖНО: создаем отдельный счетчик для каждого преподавателя
     const teacherCounters = new Map<string, number>()
+    const uniqueTeachersFound = new Set<string>()
 
     try {
       // Итерируемся по всем задачам формы (БЕЗ фильтрации по статусу задачи!)
@@ -199,9 +202,13 @@ export class PyrusSyncServiceV2 {
           if (error instanceof Error && error.message === 'EXCLUDED_BRANCH') {
             continue // Пропускаем исключенные филиалы
           }
+          extractionErrorsCount++
           console.warn(`Ошибка извлечения данных из задачи ${taskId}:`, error)
           continue
         }
+
+        // Отслеживаем всех уникальных преподавателей
+        uniqueTeachersFound.add(teacherData.name)
 
         // ОТЛАДКА: считаем ВСЕ найденные задачи для целевого преподавателя
         if (teacherData.name === this.DEBUG_TARGET) {
@@ -210,6 +217,7 @@ export class PyrusSyncServiceV2 {
 
         // Проверяем валидность статуса PE - фильтруем только PE Start, PE Future, PE 5
         if (!teacherData.isValidPEStatus) {
+          invalidPECount++
           continue
         }
 
@@ -284,7 +292,15 @@ export class PyrusSyncServiceV2 {
         })
       }
 
-      console.log(`Завершен анализ формы 2304918. Обработано ${taskCount} задач, отфильтровано ${filteredCount} с валидным статусом PE, исключено ${excludedCount} преподавателей.`)
+      console.log('\n📊 === ДЕТАЛЬНАЯ СТАТИСТИКА ФОРМЫ 2304918 ===')
+      console.log(`  Всего задач обработано: ${taskCount}`)
+      console.log(`  Уникальных преподавателей найдено: ${uniqueTeachersFound.size}`)
+      console.log(`  Задач с невалидным PE статусом: ${invalidPECount}`)
+      console.log(`  Ошибок извлечения данных: ${extractionErrorsCount}`)
+      console.log(`  Задач с валидным PE статусом: ${filteredCount}`)
+      console.log(`  Преподавателей исключено: ${excludedCount}`)
+      console.log(`  Преподавателей добавлено в рейтинг: ${this.teachersStats.size}`)
+      console.log('==============================================\n')
 
       // ОТЛАДКА: проверяем финальное состояние для целевого преподавателя
       if (this.teachersStats.has(this.DEBUG_TARGET)) {
@@ -312,9 +328,12 @@ export class PyrusSyncServiceV2 {
     let excludedCount = 0
     let taskCount = 0
     let filteredCount = 0
+    let invalidPECount = 0
+    let extractionErrorsCount = 0
     
     // КРИТИЧЕСКИ ВАЖНО: создаем отдельный счетчик для каждого преподавателя
     const teacherCounters = new Map<string, number>()
+    const uniqueTeachersFound = new Set<string>()
 
     try {
       // Итерируемся по всем задачам формы (БЕЗ фильтрации по статусу задачи!)
@@ -344,9 +363,13 @@ export class PyrusSyncServiceV2 {
           if (error instanceof Error && error.message === 'EXCLUDED_BRANCH') {
             continue // Пропускаем исключенные филиалы
           }
+          extractionErrorsCount++
           console.warn(`Ошибка извлечения данных из задачи ${taskId}:`, error)
           continue
         }
+
+        // Отслеживаем всех уникальных преподавателей
+        uniqueTeachersFound.add(teacherData.name)
 
         // ОТЛАДКА: считаем ВСЕ найденные задачи для целевого преподавателя
         if (teacherData.name === this.DEBUG_TARGET) {
@@ -355,6 +378,7 @@ export class PyrusSyncServiceV2 {
 
         // Проверяем валидность статуса PE - фильтруем только PE Start, PE Future, PE 5
         if (!teacherData.isValidPEStatus) {
+          invalidPECount++
           continue
         }
 
@@ -429,7 +453,15 @@ export class PyrusSyncServiceV2 {
         })
       }
 
-      console.log(`Завершен анализ формы 792300. Обработано ${taskCount} задач, отфильтровано ${filteredCount} с валидным статусом PE, исключено ${excludedCount} преподавателей.`)
+      console.log('\n📊 === ДЕТАЛЬНАЯ СТАТИСТИКА ФОРМЫ 792300 ===')
+      console.log(`  Всего задач обработано: ${taskCount}`)
+      console.log(`  Уникальных преподавателей найдено: ${uniqueTeachersFound.size}`)
+      console.log(`  Задач с невалидным PE статусом: ${invalidPECount}`)
+      console.log(`  Ошибок извлечения данных: ${extractionErrorsCount}`)
+      console.log(`  Задач с валидным PE статусом: ${filteredCount}`)
+      console.log(`  Преподавателей исключено: ${excludedCount}`)
+      console.log(`  Преподавателей добавлено в рейтинг: ${this.teachersStats.size}`)
+      console.log('==============================================\n')
 
       // ОТЛАДКА: проверяем финальное состояние для целевого преподавателя
       if (this.teachersStats.has(this.DEBUG_TARGET)) {
@@ -468,15 +500,28 @@ export class PyrusSyncServiceV2 {
       pyrusDebugLogger.printFinalSummary()
 
       // Выводим краткую статистику
-      console.log('\n=== КРАТКАЯ СТАТИСТИКА ===')
+      console.log('\n🎯 === ИТОГОВАЯ СТАТИСТИКА СИНХРОНИЗАЦИИ ===')
       teachersProcessed = this.teachersStats.size
       branchesProcessed = this.branchesStats.size
-      console.log(`Всего преподавателей: ${teachersProcessed}`)
+      console.log(`Всего уникальных преподавателей в рейтинге: ${teachersProcessed}`)
       console.log(`Всего филиалов: ${branchesProcessed}`)
+      
+      // Показываем список всех преподавателей для отладки
+      if (teachersProcessed <= 100) { // Если не слишком много
+        console.log('\n📋 Список преподавателей в рейтинге:')
+        let counter = 1
+        for (const [name, stats] of this.teachersStats) {
+          console.log(`  ${counter}. ${name} (2304918: ${stats.form_2304918_total}, 792300: ${stats.form_792300_total})`)
+          counter++
+        }
+      }
+      console.log('==============================================\n')
 
       // Преобразуем в формат для базы данных
       const teacherMetrics = this.convertToTeacherMetrics()
       const branchMetrics = this.convertToBranchMetrics()
+      
+      console.log(`📝 Преобразовано ${teacherMetrics.length} метрик для записи в БД`)
 
       // Обновляем базу данных
       await this.updateTeacherMetrics(teacherMetrics)
@@ -567,7 +612,19 @@ export class PyrusSyncServiceV2 {
   }
 
   /**
+   * Утилита для разбивки массива на чанки (батчи)
+   */
+  private chunkArray<T>(array: T[], chunkSize: number): T[][] {
+    const chunks: T[][] = []
+    for (let i = 0; i < array.length; i += chunkSize) {
+      chunks.push(array.slice(i, i + chunkSize))
+    }
+    return chunks
+  }
+
+  /**
    * Обновление таблицы teacher_metrics (как в оригинальном сервисе)
+   * С батчингом запросов для надежности
    */
   private async updateTeacherMetrics(metrics: TeacherMetrics[]): Promise<void> {
     console.log(`Обновление teacher_metrics (${metrics.length} записей)`)
@@ -582,22 +639,64 @@ export class PyrusSyncServiceV2 {
       const teacherNames = metrics.map(m => m.teacher_name)
       console.log(`Поиск ID для ${teacherNames.length} преподавателей`)
       
-      // ТОЧНОЕ сопоставление имен — Pyrus является источником истины
-      const { data: profiles, error: profilesError } = await supabaseAdmin
-        .from('profiles')
-        .select('user_id, full_name, email')
-        .in('full_name', teacherNames)
-        .eq('role', 'Teacher')
+      // БАТЧИНГ: разбиваем запрос на чанки по 50 имен для надежности
+      const BATCH_SIZE = 50
+      const nameBatches = this.chunkArray(teacherNames, BATCH_SIZE)
+      console.log(`Запросы разбиты на ${nameBatches.length} батчей по ${BATCH_SIZE} имен`)
+      
+      // Собираем результаты всех батчей
+      const allProfiles: Array<{ user_id: string; full_name: string; email: string }> = []
+      const batchErrors: string[] = []
 
-      if (profilesError) {
-        throw new Error(`Ошибка получения профилей: ${profilesError.message}`)
+      // Выполняем запросы батчами
+      for (let i = 0; i < nameBatches.length; i++) {
+        const batch = nameBatches[i]
+        console.log(`  Обработка батча ${i + 1}/${nameBatches.length} (${batch.length} имен)...`)
+        
+        try {
+          // Ищем по ФИО БЕЗ фильтра по role - Pyrus является источником истины
+          // Если человек есть в формах Pyrus → он преподаватель
+          const { data: profiles, error: profilesError } = await supabaseAdmin
+            .from('profiles')
+            .select('user_id, full_name, email')
+            .in('full_name', batch)
+
+          if (profilesError) {
+            const errorMsg = `Ошибка в батче ${i + 1}: ${profilesError.message}`
+            batchErrors.push(errorMsg)
+            console.warn(`  ⚠️  ${errorMsg}`)
+            continue // Продолжаем обработку следующих батчей
+          }
+
+          if (profiles && profiles.length > 0) {
+            allProfiles.push(...profiles)
+            console.log(`  ✅ Батч ${i + 1}: найдено ${profiles.length} профилей`)
+          } else {
+            console.log(`  ℹ️  Батч ${i + 1}: профили не найдены`)
+          }
+        } catch (batchError) {
+          const errorMsg = `Исключение в батче ${i + 1}: ${batchError instanceof Error ? batchError.message : 'Unknown error'}`
+          batchErrors.push(errorMsg)
+          console.error(`  ❌ ${errorMsg}`)
+          continue // Продолжаем обработку следующих батчей
+        }
       }
 
-      console.log(`Найдено ${profiles?.length || 0} профилей преподавателей`)
+      // Проверяем результаты батчинга
+      if (batchErrors.length > 0) {
+        console.warn(`⚠️  Возникли ошибки в ${batchErrors.length} батчах:`)
+        batchErrors.forEach(err => console.warn(`  - ${err}`))
+      }
+
+      if (allProfiles.length === 0) {
+        throw new Error(`Не удалось получить ни одного профиля (обработано ${nameBatches.length} батчей, ошибок: ${batchErrors.length})`)
+      }
+
+      console.log(`Найдено ${allProfiles.length} профилей преподавателей из ${teacherNames.length} запрошенных`)
 
       // Создаем маппинг имя -> teacher_id с ТОЧНЫМ совпадением
       const nameToIdMap = new Map<string, string>()
-      profiles?.forEach(profile => {
+      allProfiles.forEach(profile => {
         if (profile.full_name && teacherNames.includes(profile.full_name)) {
           nameToIdMap.set(profile.full_name, profile.user_id)
           console.log(`  ✅ Сопоставлен: "${profile.full_name}" → ${profile.user_id}`)

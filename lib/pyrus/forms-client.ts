@@ -1,8 +1,8 @@
 /**
- * Клиент для работы с формами Pyrus
+ * Клиент для работы с формами Pyrus API v4
  * 
- * ОБНОВЛЕНО: Использует новую надежную архитектуру с правильной пагинацией
- * Основана на проверенной логике из final_fixed_report.md
+ * Использует курсорную пагинацию по официальной документации Pyrus API.
+ * @see PYRUS_API_INTEGRATION_GUIDE.md
  */
 
 import { PyrusBaseClient, PyrusRequestOptions } from './base-client'
@@ -26,11 +26,8 @@ export interface PyrusField {
   [key: string]: any
 }
 
-interface PyrusTasksResponse {
-  tasks: PyrusTask[]
-  has_more: boolean
-  next_task_id?: number
-}
+// Примечание: PyrusTasksResponse теперь определен в pagination-handler.ts
+// и использует курсорную пагинацию (next_cursor вместо next_task_id)
 
 export interface FormsIteratorOptions {
   includeArchived?: boolean
@@ -50,14 +47,15 @@ export class PyrusFormsClient extends PyrusBaseClient {
   }
   
   /**
-   * НОВЫЙ: Итератор по задачам формы с правильной пагинацией
-   * Использует проверенную логику из Python
+   * Итератор по задачам формы с курсорной пагинацией
+   * Использует официальную документацию Pyrus API v4
+   * @see PYRUS_API_INTEGRATION_GUIDE.md
    */
   async *iterRegisterTasks(
     formId: number, 
     options: FormsIteratorOptions = {}
   ): AsyncGenerator<PyrusTask, void, unknown> {
-    // Преобразуем опции к новому формату
+    // Преобразуем опции к формату пагинатора
     const paginationOptions: PaginationOptions = {
       includeArchived: options.includeArchived,
       maxTasks: options.maxTasks,
@@ -65,7 +63,7 @@ export class PyrusFormsClient extends PyrusBaseClient {
       logProgress: true
     }
 
-    // Используем новый надежный пагинатор
+    // Используем курсорный пагинатор
     for await (const task of this.paginationHandler.iterateAllTasks(formId, paginationOptions)) {
       yield task
     }
